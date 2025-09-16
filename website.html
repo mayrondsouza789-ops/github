@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enhanced Combined Mini Project</title>
+    <style>
+    
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #e6eef7;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+nav {
+    background: linear-gradient(90deg, #1abc9c, #3498db);
+    padding: 15px;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+nav a {
+    color: white;
+    margin: 5px 15px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s, transform 0.3s;
+    padding: 8px 12px;
+    border-radius: 5px;
+}
+
+nav a:hover, nav a.active {
+    color: #f1c40f;
+    transform: translateY(-2px);
+}
+
+section {
+    padding: 60px 20px;
+    margin: 20px auto;
+    max-width: 900px;
+    background-color: #ffffff;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    transition: transform 0.3s ease-in-out;
+}
+
+section:hover {
+    transform: translateY(-5px);
+}
+
+h1, h2, h3 {
+    color: #1abc9c;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+button[type="submit"], input[type="submit"], button {
+    background-color: #1abc9c;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+button:hover, input[type="submit"]:hover {
+    background-color: #16a085;
+    transform: translateY(-2px);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    background-color: #1abc9c;
+    color: white;
+    margin-top: 40px;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="#index" class="active">Index</a>
+        <a href="#profile">Profile</a>
+        <a href="#timetable">Timetable</a>
+        <a href="#reservation">Reservation</a>
+        <a href="#application">Application</a>
+        <a href="#home">Home</a>
+        <a href="#css-demo">CSS Demo</a>
+        <a href="#leapyear">Leap Year</a>
+        <a href="#converter">Converter</a>
+        <a href="#validate">Validate</a>
+    </nav>
+
+    <main style="margin-top: 80px;">
+        <section id="index">
+            <h2>Welcome to My Mini Website Project</h2>
+            <p>This project demonstrates a combination of HTML, CSS, JavaScript, and showcases different web development concepts in one cohesive page.</p>
+        </section>
+    
+        <section id="profile">
+            <h2>My Profile</h2>
+            <p><b>Educational Details:</b> BCA Student</p>
+            <p><b>Hobbies:</b> Reading, Coding, Playing Football</p>
+            <p><b>Achievements:</b> State and National level football player</p>
+            <p><b>My Ideals:</b> Continuous learning & self-improvement</p>
+        </section>
+    
+        <section id="timetable">
+             <h1>3rd Sem BCA</h1>
+    </header>
+    <table>
+        <tr>
+            <th>Day</th>
+            <th>10:10-11:00</th>
+            <th>11:05-11:55</th>
+            <th>12:00-12:50</th>
+            <th>1:50-2:40</th>
+            <th>2:45-3:35</th>
+            <th>3:40-4:30</th>
+        </tr>
+        <tr>
+            <td>Monday</td>
+            <td></td>
+            <td></td>
+            <td>GE</td>
+            <td rowspan="6">LUNCH</td>
+            <td colspan="2" >DBMS LAB</td>
+        </tr>
+        <tr>
+            <td>Tuesday</td>
+            <td></td>
+            <td></td> 
+            <td>GE</td>
+            <td>DBMS</td>
+            <td>AI</td>
+        </tr>
+        <tr>
+            <td>Wednesday</td>
+            <td></td>
+            <td></td>
+            <td>GE</td>
+            <td>COA</td>
+            <td>DBMS</td>
+        </tr>
+        <tr>
+            <td>Thursday</td>
+            <td></td>
+            <td>WEB</td>
+            <td>LANG</td>
+            <td>COA</td>
+            <td>AI</td>
+        </tr>
+        <tr>
+            <td>Friday</td>
+            <td>WEB</td>
+            <td>OE</td>
+            <td>LANG</td>
+            <td colspan="2">WEB LAB</td>
+        </tr>
+        <tr>
+            <td>Saturday</td>
+            <td></td>
+            <td></td>
+            <td>AI</td>
+            <td>LANG</td>
+            <td></td>
+        </tr>
+    </table>
+        </section>
+    
+        <section id="reservation">
+            <h2>Reservation Form</h2>
+            <form>
+                <div class="form-group">
+                    <label for="res-name">Name:</label>
+                    <input type="text" id="res-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="res-date">Date:</label>
+                    <input type="date" id="res-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="res-time">Time:</label>
+                    <input type="time" id="res-time" required>
+                </div>
+                <div class="form-group">
+                    <label for="res-people">Number of people:</label>
+                    <input type="number" id="res-people" min="1" required>
+                </div>
+                <button type="submit">Reserve</button>
+            </form>
+        </section>
+    
+        <section id="application">
+            <h2>Application Form</h2>
+            <form>
+                <div class="form-group">
+                    <label for="app-name">Name:</label>
+                    <input type="text" id="app-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="app-address">Address:</label>
+                    <textarea id="app-address" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="app-email">Email:</label>
+                    <input type="email" id="app-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="app-qualification">Qualification:</label>
+                    <input type="text" id="app-qualification" required>
+                </div>
+                <button type="submit">Submit</button>
+            </form>
+        </section>
+    
+        <section id="home">
+            <h2>Welcome to My Stylish Home Page</h2>
+            <p>This page uses external CSS for styling, a clear demonstration of separating content from presentation.</p>
+            <img src="https://umbrellacreative.com.au/wp-content/uploads/2020/01/hide-the-pain-harold-why-you-should-not-use-stock-photos.jpg" alt="A placeholder image demonstrating a stylish home page layout" style="width: 100%; height: auto; border-radius: 8px;">
+        </section>
+    
+        <section id="css-demo">
+            <h2>CSS Demonstration</h2>
+            <p style="color: red; font-weight: bold;">This is Inline Style</p>
+            <p class="internal-style">This is Internal Style</p>
+            <p class="external-style">This is External Style (via the main stylesheet)</p>
+            <style>
+                .internal-style {
+                    color: #2c3e50;
+                    font-size: 1.1em;
+                    font-style: italic;
+                }
+            </style>
+        </section>
+    
+        <section id="leapyear">
+            <h2>Leap Year Checker</h2>
+            <div class="form-group">
+                <input type="number" id="year" placeholder="Enter Year">
+            </div>
+            <button onclick="checkLeapYear()">Check</button>
+            <p id="result" style="margin-top: 15px; font-weight: bold;"></p>
+        </section>
+    
+        <section id="converter">
+            <h2>Temperature Converter</h2>
+            <div class="form-group">
+                <input type="number" id="temp" placeholder="Enter Temperature">
+            </div>
+            <div class="form-group">
+                <select id="type">
+                    <option value="c">Celsius to Fahrenheit</option>
+                    <option value="f">Fahrenheit to Celsius</option>
+                </select>
+            </div>
+            <button onclick="convertTemp()">Convert</button>
+            <p id="convertedResult" style="margin-top: 15px; font-weight: bold;"></p>
+        </section>
+    
+        <section id="validate">
+            <h2>Registration Form</h2>
+            <form onsubmit="return validateForm()">
+                <div class="form-group">
+                    <label for="firstName">First Name:</label>
+                    <input type="text" id="firstName">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password">
+                </div>
+                <button type="submit">Register</button>
+            </form>
+            <p id="errorMsg" style="color: #c0392b; margin-top: 15px;"></p>
+        </section>
+    
+    </main>
+
+    <footer>
+        <p>© 2025 Mini Project | Combined Webpage</p>
+    </footer>
+
+    <script>
+    document.querySelectorAll('nav a').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+            document.getElementById(targetId).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    window.addEventListener('scroll', () => {
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('nav a');
+        
+        let currentSection = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop - 100;
+            if (pageYOffset >= sectionTop) {
+                currentSection = section.getAttribute('id');
+            }
+        });
+        
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').substring(1) === currentSection) {
+                link.classList.add('active');
+            }
+        });
+    });
+
+    function checkLeapYear() {
+        const year = document.getElementById('year').value;
+        const result = document.getElementById('result');
+        if (!year) {
+            result.textContent = 'Please enter a year.';
+            result.style.color = '#c0392b';
+            return;
+        }
+
+        if ((year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0)) {
+            result.textContent = `${year} is a leap year. 🎉`;
+            result.style.color = '#27ae60';
+        } else {
+            result.textContent = `${year} is not a leap year. 🙁`;
+            result.style.color = '#c0392b';
+        }
+    }
+
+    function convertTemp() {
+        const temp = document.getElementById('temp').value;
+        const type = document.getElementById('type').value;
+        const resultElement = document.getElementById('convertedResult');
+
+        if (temp === '') {
+            resultElement.textContent = 'Please enter a temperature.';
+            resultElement.style.color = '#c0392b';
+            return;
+        }
+
+        let result;
+        if (type === 'c') {
+            result = (temp * 9/5) + 32;
+            resultElement.textContent = `${temp}°C = ${result.toFixed(2)}°F`;
+        } else {
+            result = (temp - 32) * 5/9;
+            resultElement.textContent = `${temp}°F = ${result.toFixed(2)}°C`;
+        }
+        resultElement.style.color = '#27ae60';
+    }
+
+    function validateForm() {
+        const firstName = document.getElementById('firstName').value;
+        const password = document.getElementById('password').value;
+        const errorMsg = document.getElementById('errorMsg');
+
+        errorMsg.textContent = "";
+
+        if (!/^[A-Za-z]{6,}$/.test(firstName)) {
+            errorMsg.textContent = "First name must be at least 6 alphabet characters.";
+            return false;
+        }
+
+        if (password.length < 6) {
+            errorMsg.textContent = "Password must be at least 6 characters long.";
+            return false;
+        }
+
+        alert("Form submitted successfully!");
+        return true;
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Sustainable Living Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .container {
+            max-width: 1200px;
+        }
+
+        .section-break {
+            background-color: #e5e7eb;
+            height: 1px;
+            margin: 4rem 0;
+        }
+
+        header {
+            background-color: #2563eb;
+        }
+
+        header a {
+            color: #ffffff;
+        }
+
+        .card {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        button {
+            background-color: #10b981;
+        }
+
+        button:hover {
+            background-color: #059669;
+        }
+
+        input {
+            background-color: #e5e7eb;
+            border: 1px solid #d1d5db;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            width: 100%;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <header class="shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-white">🌱 GreenLife Portfolio</a>
+            <nav class="flex flex-wrap justify-center md:justify-end space-x-4 text-sm font-medium">
+                <a href="#eco-tips" class="hover:text-green-300 transition">Eco Tips</a>
+                <a href="#profile" class="hover:text-green-300 transition">Profile</a>
+                <a href="#calendar" class="hover:text-green-300 transition">Events</a>
+                <a href="#subscribe" class="hover:text-green-300 transition">Subscribe</a>
+                <a href="#tools" class="hover:text-green-300 transition">Tools</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-10">
+
+        <section class="text-center py-12">
+            <h1 class="text-4xl font-bold mb-4 text-blue-600">Live Sustainably, Love Earth</h1>
+            <p class="text-lg text-gray-700 max-w-xl mx-auto">Empower yourself with green tips, eco events, and interactive tools for a sustainable future.</p>
+            <a href="#subscribe" class="mt-6 inline-block px-8 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600">Join Eco Movement</a>
+        </section>
+
+        <div class="section-break"></div>
+
+        <section id="eco-tips" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="card">
+                <h2 class="text-2xl font-bold text-blue-600 mb-4">Daily Eco Tips</h2>
+                <ul class="list-disc pl-5 space-y-3 text-gray-700">
+                    <li>🚯 Reduce plastic waste daily</li>
+                    <li>🚲 Walk or bike for short trips</li>
+                    <li>🌞 Use natural light over electricity</li>
+                    <li>♻️ Recycle properly at home</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2 class="text-2xl font-bold text-blue-600 mb-4">Why It Matters</h2>
+                <p class="text-gray-700">Small eco-friendly actions create a ripple effect, leading to cleaner air, reduced landfill waste, and a healthier planet for generations to come.</p>
+            </div>
+        </section>
+
+        <div class="section-break"></div>
+
+        <section id="profile" class="card text-center">
+            <h2 class="text-3xl font-bold text-blue-600 mb-4">Your Green Profile</h2>
+            <p class="text-gray-700">Track your eco-friendly activities, goals, and make a positive difference in your community.</p>
+        </section>
+
+        <div class="section-break"></div>
+
+        <section id="calendar" class="card">
+            <h2 class="text-3xl font-bold text-blue-600 mb-6 text-center">Upcoming Green Events</h2>
+            <ul class="list-disc pl-5 space-y-2 text-gray-700">
+                <li>🌱 Tree Planting Drive – Sept 25, 2025</li>
+                <li>♻️ Plastic-Free Challenge – Oct 10, 2025</li>
+                <li>🌍 Sustainability Workshop – Nov 5, 2025</li>
+            </ul>
+        </section>
+
+        <div class="section-break"></div>
+
+        <section id="subscribe" class="card text-center">
+            <h2 class="text-3xl font-bold text-blue-600 mb-6">Subscribe to Eco Tips</h2>
+            <form id="subscribeForm" class="max-w-md mx-auto space-y-4">
+                <input type="email" id="subscriberEmail" placeholder="Your Email Address" required/>
+                <button type="submit" class="py-3 rounded-lg text-white font-semibold">Subscribe</button>
+            </form>
+        </section>
+
+        <div class="section-break"></div>
+
+        <section id="discount" class="card text-center">
+            <h2 class="text-3xl font-bold text-blue-600 mb-6">Eco Discount Calculator</h2>
+            <input type="number" id="productPrice" placeholder="Enter Product Price (₹)" min="0"/>
+            <input type="text" id="discountCode" placeholder="Enter Discount Code"/>
+            <button onclick="applyDiscount()" class="mt-4 py-2 rounded-lg text-white font-semibold">Calculate Discount</button>
+            <p id="discountResult" class="mt-4 font-medium"></p>
+        </section>
+
+        <div class="section-break"></div>
+
+        <section id="tools" class="card text-center">
+            <h2 class="text-3xl font-bold text-blue-600 mb-6">Eco Calculator</h2>
+            <input type="number" id="bottleCount" placeholder="Plastic bottles per week"/>
+            <button onclick="calculateWaste()" class="mt-4 py-2 rounded-lg text-white font-semibold">Calculate Annual Waste</button>
+            <p id="wasteResult" class="mt-4 text-green-600 font-medium"></p>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-6 bg-blue-600 text-white">
+        &copy; 2025 GreenLife Portfolio. All rights reserved.
+    </footer>
+
+    <script>
+        document.getElementById('subscribeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thanks for subscribing to GreenLife tips! 🌱');
+            this.reset();
+        });
+
+        function calculateWaste() {
+            const bottles = parseInt(document.getElementById('bottleCount').value) || 0;
+            const waste = bottles * 52;
+            document.getElementById('wasteResult').textContent = `${waste} bottles annually! Reduce waste, save Earth! 🌍`;
+        }
+
+        function applyDiscount() {
+            const validCodes = {
+                'GREEN10': 10,
+                'ECO20': 20,
+                'SAVE5': 5
+            };
+
+            const price = parseFloat(document.getElementById('productPrice').value);
+            const code = document.getElementById('discountCode').value.trim().toUpperCase();
+            const resultEl = document.getElementById('discountResult');
+
+            if (isNaN(price) || price <= 0) {
+                resultEl.textContent = '⚠️ Please enter a valid product price!';
+                resultEl.classList.remove('text-green-600');
+                resultEl.classList.add('text-red-600');
+                return;
+            }
+
+            if (validCodes[code]) {
+                const discountPercent = validCodes[code];
+                const discountedPrice = (price * (100 - discountPercent) / 100).toFixed(2);
+                resultEl.textContent = `🎉 Code applied! Original: ₹${price.toFixed(2)} | Discount: ${discountPercent}% | Final Price: ₹${discountedPrice}`;
+                resultEl.classList.remove('text-red-600');
+                resultEl.classList.add('text-green-600');
+            } else {
+                resultEl.textContent = '❌ Invalid discount code. Try GREEN10, ECO20, or SAVE5.';
+                resultEl.classList.remove('text-green-600');
+                resultEl.classList.add('text-red-600');
+            }
+        }
+    </script>
+
+</body>
+</html>
+  `
