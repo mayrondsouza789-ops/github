@@ -4,11 +4,11 @@ A working demonstration of photo check-ins, experimental hair-image segmentation
 
 ## Features
 
-Sites sign-in; owner-scoped D1 records and R2 photographs; camera/file selection; file validation and duplicate checks; saved drafts; real on-device MediaPipe HairSegmenter inference; stored derived masks; same-view comparison; report downloads; mock review drafts and guidance publishing; sharing preferences; export and confirmed deletion.
+Browser-local guest demo with optional Sites sign-in; owner-scoped D1 records and R2 photographs for signed-in accounts; camera/file selection; file validation and duplicate checks; saved drafts; real on-device MediaPipe HairSegmenter inference; stored derived masks; same-view comparison; report downloads; mock review drafts and guidance publishing; sharing preferences; export and confirmed deletion.
 
 ## Deployment status
 
-The working demo is deployed at [ProgressCheck](https://progresscheck-hair-journal.fitcove4.chatgpt.site). It is private to the owner's connected ChatGPT account; sign in to open it. Sites supplies hosted identity and Cloudflare D1/R2 storage. GitHub contains the source; GitHub Pages alone does not run this backend.
+The working demo is deployed at [ProgressCheck](https://progresscheck-hair-journal.fitcove4.chatgpt.site). It is public and works without signing in. Guest records stay in the current browser; optional sign-in opens a separate account workspace. Sites supplies hosted identity and Cloudflare D1/R2 storage. GitHub contains the source; GitHub Pages alone does not run this backend.
 
 ## Run locally
 
@@ -44,7 +44,7 @@ Doctor and administrator views operate on the same owner's demonstration workspa
 
 The model reports `100 * hair-labelled pixels / complete-image pixels`. It is not validated for scalp progress. Framing, lighting, styling and model errors affect it. There is no density, follicle count, regrowth, diagnosis, treatment assessment, alignment or automatic retraining. See `public/vendor/SOURCES.md`.
 
-Inference runs while the browser stays open. Failed/interrupted runs retain originals and can be retried. Local preview can use browser storage; hosted API failures do not silently switch to local storage.
+Inference runs while the browser stays open. Failed/interrupted runs retain originals and can be retried. An explicit unauthenticated API response opens the guest demo. Guest records and photographs stay in this browser, do not sync or transfer into a signed-in account, and are removed when browser data is cleared. Storage failures disable saving and uploads. Service errors and malformed account responses block access rather than silently switching to guest storage.
 
 ## Verification
 
