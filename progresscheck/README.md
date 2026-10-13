@@ -8,7 +8,7 @@ Sites sign-in; owner-scoped D1 records and R2 photographs; camera/file selection
 
 ## Deployment status
 
-The complete demo runs locally. Uploading this source to GitHub does not publish a live website. Hosted deployment has not completed. Sites supplies the hosted identity and Cloudflare D1/R2 environment; GitHub Pages alone does not run the backend.
+The working demo is deployed at [ProgressCheck](https://progresscheck-hair-journal.fitcove4.chatgpt.site). It is private to the owner's connected ChatGPT account; sign in to open it. Sites supplies hosted identity and Cloudflare D1/R2 storage. GitHub contains the source; GitHub Pages alone does not run this backend.
 
 ## Run locally
 
