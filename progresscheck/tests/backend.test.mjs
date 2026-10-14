@@ -8,7 +8,7 @@ import vm from 'node:vm';
 import ts from 'typescript';
 
 const root = resolve(import.meta.dirname, '..');
-const source = readFileSync(resolve(root, 'app/api/[...path]/route.ts'), 'utf8');
+const source = readFileSync(resolve(root, 'server/sites-route.ts'), 'utf8');
 const compiled = ts.transpileModule(source, { compilerOptions: {
   module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022,
 } }).outputText;
@@ -53,7 +53,7 @@ function harness() {
     Uint8Array, crypto: webcrypto,
     require(name) {
       if (name === 'cloudflare:workers') return { env };
-      if (name === '../../chatgpt-auth') return { getChatGPTUser: async () => identity };
+      if (name === '../app/chatgpt-auth') return { getChatGPTUser: async () => identity };
       throw new Error('Unexpected import: ' + name);
     },
   });

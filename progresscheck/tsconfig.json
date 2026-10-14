@@ -25,6 +25,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@progresscheck/backend": [
+        "./server/supabase-route.ts"
       ]
     },
     "types": [
@@ -42,6 +45,8 @@
   ],
   "exclude": [
     "node_modules",
-    "examples"
+    "examples",
+    ".vercel",
+    ".output"
   ]
 }
