@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "ProgressCheck | Hair progress workspace",
+  title: "ProgressCheck Demo | Weekly image analysis",
   description: "Track photo check-ins, explore experimental on-device hair segmentation, and try a demonstration review workflow.",
   icons: {
     icon: "/favicon.svg",
