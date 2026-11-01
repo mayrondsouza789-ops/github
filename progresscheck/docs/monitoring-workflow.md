@@ -34,3 +34,7 @@ Run `node --test tests/monitoring.test.mjs tests/backend.test.mjs tests/setup-mo
 Browser checks cover the complete sample analysis, duplicate-source detection, missing Top evidence, a Top upload with pre-analysis quality checks, saved capture metadata, routine/log persistence, selected-pair controls, milestone and handoff preparation, PDF/JSON downloads, and mobile section widths. Tests use labelled local sample data. Production verification and final deployment identifiers are recorded in the task handoff.
 
 This is a functional research demonstration, not a clinically validated healthcare product. Clinical validation and an authenticated professional service remain separate prerequisites for real clinical use.
+
+## Report narratives
+
+The appearance demo and fully measured built-in baseline-to-final sample collection include a clearly labelled, authored positive crown-growth story with four dated check-ins. It is separate from actual segmentation and capture findings. Other scenarios, incomplete collections, earlier selected dates and uploaded records never receive this scripted outcome. Uploaded-photo assessments explain each available view, missing or repeated sources, capture limits and practical next steps. The same narratives are included in PDF and JSON exports.

@@ -5,7 +5,7 @@
     const bitmap=await createImageBitmap(await response.blob());
     try{const c=document.createElement('canvas');c.width=720;c.height=Math.round(720*bitmap.height/bitmap.width);c.getContext('2d').drawImage(bitmap,0,0,c.width,c.height);return {url:c.toDataURL('image/jpeg',.9),ratio:bitmap.height/bitmap.width};}finally{bitmap.close();}
   }
-  async function download({scenario,samples,result,summary,review}) {
+  async function download({scenario,samples,result,growthStory,summary,review}) {
     if(!window.jspdf?.jsPDF)throw Error('The PDF library did not load. Reload the page and retry.');
     const images=await Promise.all(samples.map(s=>photo(s.url)));
     const pdf=new window.jspdf.jsPDF({unit:'mm',format:'a4',compress:true});
@@ -13,7 +13,14 @@
     const plain=s=>String(s).replace(/[→]/g,' to ').replace(/[–—−]/g,'-').replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[·]/g,' | ').replace(/[^\x20-\x7e\n]/g,'');
     const text=(s,x,y,width=174,size=10,bold=false)=>{pdf.setFont('helvetica',bold?'bold':'normal');pdf.setFontSize(size);const lines=pdf.splitTextToSize(plain(s),width);pdf.text(lines,x,y,{lineHeightFactor:1.35});return y+lines.length*size*.3528*1.35;};
     function header(subtitle){pdf.setFillColor(36,75,61);pdf.rect(0,0,210,29,'F');pdf.setTextColor(255,255,255);text('ProgressCheck  /  DEMO REPORT',18,13,174,15,true);text(subtitle,18,22,174,9);pdf.setTextColor(35,51,43);}
-    function footer(n){pdf.setDrawColor(210,220,209);pdf.line(18,278,192,278);pdf.setTextColor(85,101,89);text('Synthetic photos | Experimental measurements | Not medical advice',18,284,155,8);text(n+' / 3',181,284,20,8);}
+    function footer(n){pdf.setDrawColor(210,220,209);pdf.line(18,278,192,278);pdf.setTextColor(85,101,89);text('Synthetic photos | Experimental measurements | Not medical advice',18,284,155,8);text((n+(growthStory?2:0))+' / '+(growthStory?5:3),181,284,20,8);}
+    if(growthStory){
+      header('SIMULATED GROWTH STORY / Not a measured clinical finding');
+      let sy=text(growthStory.title,18,44,174,23,true);sy=text(growthStory.verdict,18,sy+8,174,15,true);sy=text(growthStory.summary,18,sy+7,174,11);sy=text(growthStory.scope,18,sy+7,174,10);sy=text(growthStory.timelineNote,18,sy+5,174,10);
+      const top=Math.max(sy+12,143),ih=Math.min(62,84*images[0].ratio);pdf.addImage(images[0].url,'JPEG',18,top,84,ih);pdf.addImage(images[3].url,'JPEG',108,top,84,ih);text('Baseline illustration',18,top+ih+6,84,9,true);text('Positive-outcome illustration',108,top+ih+6,84,9,true);text(growthStory.conclusion,18,top+ih+18,174,10);footer(-1);
+      pdf.addPage();header('SIMULATED WEEKLY FINDINGS / Authored demonstration');
+      let wy=40;for(const w of growthStory.weeks){wy=text((w.week?'Check-in '+w.week:'Baseline')+' | '+w.date+' | '+w.title,18,wy,174,12,true);wy=text(w.finding,18,wy+3,174,9);wy=text(w.meaning,18,wy+2,174,8);wy=text('Measured evidence: '+w.captureNote,18,wy+2,174,8);wy+=7;}footer(0);pdf.addPage();
+    }
     header('01 / Summary and source images');
     let y=text(scenario.title,18,41,174,21,true);
     y=text(summary.heading,18,y+5,174,13,true);

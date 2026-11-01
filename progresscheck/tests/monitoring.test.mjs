@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
+await import('../public/report-story.js');
 await import('../public/monitoring-core.js');
 const C=globalThis.MonitoringCore;
 const exports={};vm.runInNewContext(ts.transpileModule(readFileSync(new URL('../server/monitoring-validation.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports});
@@ -20,3 +21,22 @@ test('repeated source files never imply independent follow-up evidence',()=>{con
 test('adherence uses logged applications only, excludes sample logs',()=>{const s=structuredClone(state);s.monitoring={real:{logs:[{planned:2,completed:1}],routines:[],reviews:[]},sample:{logs:[{planned:10,completed:10}]}};const d=C.build(s);assert.equal(d.adherence.percent,50);assert.equal(d.adherence.missed,1);assert.match(d.adherence.definition,/Unlogged days are unknown/);});
 test('routine and log validation rejects impossible dates and counts',()=>{assert.equal(C.validDate('2026-02-30'),false);assert.throws(()=>C.validateRoutine({name:'X',type:'Other',startDate:'2027-01-01',frequency:'daily'},'2026-10-31'));assert.throws(()=>C.validateLog({routineId:'r',date:'2026-10-20',planned:1,completed:2},'2026-10-31',[{id:'r',startDate:'2026-10-01'}]));});
 test('server accepts legacy state and validates routine references, duplicate logs and spoofed review status',()=>{const r={id:'r',name:'Test',type:'Haircare',startDate:'2026-10-01',frequency:'daily',notes:'',createdAt:'2026-10-31T12:00:00Z'},l={id:'l',routineId:'r',date:'2026-10-02',planned:2,completed:1,experience:'',sideEffects:'',createdAt:r.createdAt};const m={real:{routines:[r],logs:[l],reviews:[]}};assert.equal(validate(undefined),true);assert.equal(validate(m),true);m.real.logs.push({...l,id:'l2'});assert.equal(validate(m),false);m.real.logs=[{...l,routineId:'other'}];assert.equal(validate(m),false);m.real.logs=[];m.real.reviews=[{id:'x',sessionId:'latest',questions:'Review',consultation:null,createdAt:r.createdAt,status:'doctor_reviewed'}];assert.equal(validate(m),false);});
+
+
+test('positive story is gated to completed built-in sample journey, never uploads or earlier dates',()=>{
+ const samples={sessions:[0,1,2,3].map(i=>session('sample-'+i,'2026-10-0'+(i+1),40+i,true))};
+ const d=C.build(samples,{scope:'sample'});assert.equal(d.growthStory.kind,'scripted_simulation');assert.equal(d.growthStory.weeks.length,4);assert.match(d.growthStory.title,/simulated/);assert.match(d.growthStory.summary,/authored/);
+ assert.equal(C.build(samples,{scope:'sample',latestId:'sample-1'}).growthStory,null);
+ assert.equal(C.build(samples,{scope:'sample',baseId:'sample-2'}).growthStory,null);
+ assert.equal(C.build({...samples,sessions:samples.sessions.map(s=>({...s,sample:false}))}).growthStory,null);
+ delete samples.sessions[1].analysis;assert.equal(C.build(samples,{scope:'sample'}).growthStory,null);
+});
+test('real assessment explains changes and repeated sources without asserting growth',()=>{
+ const d=C.build(state);assert.equal(d.assessment.regions[4].status,'Image change detected');assert.match(d.assessment.summary,/not confirmed new growth/);assert.equal(d.growthStory,null);
+ const repeated=structuredClone(state);repeated.sessions[0].analysis.observations[0].sourceHash='same';repeated.sessions[2].analysis.observations[0].sourceHash='same';assert.equal(C.build(repeated).assessment.regions[4].status,'Reused photograph');
+ assert.match(C.build({sessions:[]}).assessment.title,/Start with/);
+});
+test('story HTML escapes record values and disabled simulations stay absent',()=>{
+ assert.equal(ProgressStory.simulation({dates:['2026-01-01']}),null);
+ const s=ProgressStory.simulation({enabled:true,dates:['<script>'],quality:['<img onerror=x>']});const html=ProgressStory.simulationHTML(s);assert.ok(!html.includes('<script>'));assert.ok(html.includes('&lt;img'));assert.match(html,/SCRIPTED NARRATIVE/);
+});
