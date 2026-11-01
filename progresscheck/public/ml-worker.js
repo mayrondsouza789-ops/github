@@ -103,7 +103,9 @@ async function analyze({ runId, photos, options }) {
         stage('checking_image', `Reading photograph ${index + 1} of ${photos.length}.`, index);
         const response = await fetch(photo.url);
         if (!response.ok) throw new Error('The saved photograph could not be read. Re-add it and retry.');
-        bitmap = await createImageBitmap(await response.blob());
+        const sourceBlob = await response.blob();
+        const sourceHash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', await sourceBlob.arrayBuffer())), b => b.toString(16).padStart(2, '0')).join('');
+        bitmap = await createImageBitmap(sourceBlob);
         if (bitmap.width < 16 || bitmap.height < 16) throw new Error('The photograph is too small to analyze. Upload an image at least 16 by 16 pixels.');
         if (bitmap.width * bitmap.height > 20000000) throw new Error('This photograph exceeds the demo limit of 20 megapixels. Add a smaller copy and retry; the original is unchanged.');
         const quality = qualityMetrics(bitmap);
@@ -131,7 +133,7 @@ async function analyze({ runId, photos, options }) {
         if (!hairPixels) quality.warnings.push('The model labelled no pixels as hair. This does not establish absence of hair.');
         const preview = options.includeMask ? await maskPreview(category, maskWidth, maskHeight) : {};
         observations.push({
-          photoId: photo.id, view: photo.view,
+          photoId: photo.id, view: photo.view, sourceHash,
           hairAreaPercent: round(100 * hairPixels / category.length, 3),
           meanConfidence: hairPixels ? round(confidenceSum / hairPixels, 5) : null,
           width: bitmap.width, height: bitmap.height,

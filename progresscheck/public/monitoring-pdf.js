@@ -1,0 +1,56 @@
+(function () {
+  'use strict';
+  const ascii = value => String(value??'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[\u2010-\u2015]/g,'-').replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/→/g,' -> ').replace(/·/g,' | ').replace(/[^\x20-\x7e\n]/g,'?');
+  async function loadImage(P,id,transparent=false) {
+    let bitmap;
+    try {const response=await fetch(P.photoURL(id));if(!response.ok)throw Error('Source unavailable');bitmap=await createImageBitmap(await response.blob());const scale=Math.min(1,1400/Math.max(bitmap.width,bitmap.height));const canvas=document.createElement('canvas');canvas.width=Math.round(bitmap.width*scale);canvas.height=Math.round(bitmap.height*scale);canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);return {data:canvas.toDataURL(transparent?'image/png':'image/jpeg',.9),ratio:bitmap.width/bitmap.height};}
+    catch{return null;}finally{bitmap?.close();}
+  }
+  async function create(P,input) {
+    const d=structuredClone(input),C=window.MonitoringCore;
+    if(!window.jspdf?.jsPDF)throw Error('The PDF library could not load. Reload the page and retry.');
+    const pdf=new jspdf.jsPDF({unit:'mm',format:'a4',compress:true}),assets=new Map();
+    for(const s of d.timeline)for(const p of s.photos){if(!assets.has(p.id))assets.set(p.id,await loadImage(P,p.id));const mask=p.observation?.maskId;if(mask&&!assets.has(mask))assets.set(mask,await loadImage(P,mask,true));}
+    let y=30;
+    const newPage=()=>{pdf.addPage();y=30;};
+    const space=h=>{if(y+h>272)newPage();};
+    const text=(value,size=10,bold=false,color=[43,58,49])=>{pdf.setFont('helvetica',bold?'bold':'normal');pdf.setFontSize(size);pdf.setTextColor(...color);const lines=pdf.splitTextToSize(ascii(value),174);for(const line of lines){space(size*.46+2);pdf.text(line,18,y);y+=size*.46+1;}y+=3;};
+    const heading=(title,fresh=false)=>{if(fresh)newPage();space(20);text(title,19,false,[19,48,38]);y+=2;};
+    const bullets=items=>items.forEach(s=>text('- '+s));
+    function photo(id,x,top,w,h,label,maskId){const a=assets.get(id);pdf.setFillColor(243,241,233);pdf.roundedRect(x,top,w,h,2,2,'F');if(a){const iw=Math.min(w,h*a.ratio),ih=iw/a.ratio;pdf.addImage(a.data,'JPEG',x+(w-iw)/2,top+(h-ih)/2,iw,ih);const mask=assets.get(maskId);if(mask)pdf.addImage(mask.data,'PNG',x+(w-iw)/2,top+(h-ih)/2,iw,ih);}else{pdf.setFontSize(9);pdf.setTextColor(90,96,88);pdf.text('Source photo unavailable',x+4,top+h/2);}pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.setTextColor(62,75,66);pdf.text(pdf.splitTextToSize(ascii(label),w),x,top+h+5);}
+    pdf.setProperties({title:'ProgressCheck monitoring assessment',subject:'Experimental image evidence and self-reported monitoring record',creator:'ProgressCheck',author:'ProgressCheck'});
+    y=45;text('PROGRESSCHECK',13,true);y+=12;text('Your monitoring assessment',30);text('Photographic evidence. Recorded routines. Considered next steps.',12);y+=12;
+    text(d.sample?'SIMULATED COLLECTION - NOT A PATIENT REPORT':'PERSONAL MONITORING RECORD - RESEARCH DEMONSTRATION',11,true);
+    text('Name / identifier: '+d.profile.name);text('Assessment date: '+(d.latest?.date||'Not recorded'));text('Reporting period: '+(d.baseline?.date||'Not recorded')+' to '+(d.latest?.date||'Not recorded'));text('Report ID: '+d.reportId);text('Generated: '+d.generatedAt);text('Goal: '+d.profile.goal);text('Demographic information: '+d.profile.demographics);y+=10;
+    text('This is not a medical diagnosis or a validated hair-growth assessment. Measurements describe pixels in photographs, not biological growth or treatment response.',11,true);
+    heading('Executive summary',true);bullets(d.insights);text('All measurements and findings in this report come from the same selected collection and assessment pair as the monitoring dashboard.');
+    heading('Baseline assessment');text('Reference date: '+(d.baseline?.date||'Not recorded')+'. '+d.baselineReason);
+    d.findings.forEach(f=>text(f.name+': '+f.baseline));
+    text('Reference selection is explicit. Missing regional photographs remain missing. Hairline shape, recession, true density, scalp visibility and thinning are not clinically assessed by this segmentation model.');
+    for(const f of d.findings){heading(f.name+' - regional evidence',true);text('User-selected photograph view: '+f.view,10,true);text('Reference: '+f.baseline);text('Selected assessment: '+f.latest);text(f.change,11,true);space(98);const top=y;photo(f.baselinePhoto?.id,18,top,83,73,(d.baseline?.date||'No date')+' | Reference | '+f.view,f.baselineObservation?.maskId);photo(f.latestPhoto?.id,109,top,83,73,(d.latest?.date||'No date')+' | Selected | '+f.view,f.latestObservation?.maskId);y+=91;text('Unaligned source photos. Green, where available, is the actual model hair mask, not a thinning or growth detection. Unannotated source copies appear in the inventory.');text('Capture evidence confidence: '+f.comparison.level,10,true);bullets(f.comparison.reasons);text(f.clinical);text('Traceability: '+(f.trace.join(' -> ')||'No source photographs.'),8);}
+    heading('Chronological assessments & progress metrics',true);text('Metric: percentage of full-image category-mask pixels classified as hair. The values are not regional scalp coverage, follicle counts or regrowth. Gaps indicate missing evidence, not failure.');
+    for(const s of d.timeline){heading(s.date+' | '+(s.sample?'Simulated':'Uploaded')+' assessment');text('Record: '+s.id+' | Status: '+s.status,9);text('Model: '+s.model+' | Processed: '+(s.processedAt||'Not run'),8);for(const p of s.photos)text(p.view+': '+(p.value===null?'Not measured':C.number(p.value)+'% full-image hair mask')+' | Source '+p.id,9);text('Missing views: '+(s.missing.join(', ')||'None'));text('User notes: '+(s.notes||'Not recorded'));for(const [k,v] of Object.entries(s.answers))text(k+': '+(v||'Not recorded'),9);}
+    heading('Photo quality & confidence methodology',true);bullets(['Brightness is mean luminance on a 0-255 scale. Values below 45 or above 215 trigger an experimental warning.','Sharpness is four-neighbor Laplacian variance at maximum image edge 512 px. Values below 65 trigger a low-detail warning.','Pair comparisons flag brightness differences above 25 and image aspect-ratio differences above 0.05.','Capture metadata is user-reported. Wet/dry state, styling, camera pose, distance, scalp visibility and background are not automatically verified.','Low confidence means missing measurements, missing capture context or flagged inconsistencies. Moderate capture evidence requires complete unflagged checks and matching reported conditions. Neither is calibrated medical confidence.']);
+    for(const s of d.timeline){text(s.date+' | '+s.id,11,true);for(const p of s.photos){text(p.view+' | '+(p.quality.available?'Brightness '+C.number(p.quality.brightness)+' / 255; sharpness '+C.number(p.quality.sharpness):'Quality not measured'),9);text(p.quality.warnings.join(' ')||'No heuristic warnings. Clinical comparability is not established.',9);}text('Capture context: '+(['hairState','styling','lighting','position','distance'].map(k=>k+' = '+(s.capture[k]||'Not recorded')).join('; ')),9);}
+    heading('Treatment history & daily experiences',true);text('Self-reported information is presented separately from photographic findings. No causal treatment conclusion is made.');
+    if(d.reportedRoutine)text('Existing profile routine (self-reported): '+d.reportedRoutine);
+    if(!d.routines.length)text('No structured treatment or haircare routine recorded.');
+    d.routines.forEach(r=>{text(r.name+' | '+r.type,12,true);text('Started '+r.startDate+' | '+r.frequency+' | '+Math.max(0,C.days(r.startDate,d.today)||0)+' days since start at report generation.');text(r.notes||'No additional routine details.');});
+    text(d.adherence.percent===null?'Adherence percentage unavailable.':d.adherence.percent+'% completion across logged applications.');text(d.adherence.completed+' completed / '+d.adherence.planned+' planned; '+d.adherence.missed+' missed on logged days.');text(d.adherence.definition);
+    if(!d.logs.length)text('No daily logs recorded.');
+    d.logs.slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(l=>{text(l.date+' | '+(d.routines.find(r=>r.id===l.routineId)?.name||'Recorded routine')+' | '+l.completed+'/'+l.planned,10,true);text('Experience: '+(l.experience||'Not recorded'));text('Side effects / concerns: '+(l.sideEffects||'None recorded'));});
+    heading('Insights & future monitoring plan',true);text('Explanations are rule-based summaries of actual model outputs and capture checks, not generative diagnoses.');bullets(d.insights);text('Future Progress Outlook',13,true);text(d.outlook);text('Next capture: '+(d.nextDate||'Not scheduled')+' | '+d.nextDateSource);text('Plan focus: '+(d.planNote||'Not recorded'));text('Use front, left temple, right temple, top and crown views. Match capture conditions and record changes. A 28-day suggested interval is an organizational default, not an expected regrowth or treatment timeline.');
+    heading('Professional review & handoff',true);text('Status: Not professionally reviewed',13,true);text('No authenticated specialist or consultation service is connected. Preparation records are private notes and have not been sent.');
+    d.reviews.filter(r=>r.sessionId===d.latest?.id).forEach(r=>{text('Prepared '+r.createdAt+' | Not sent');text('Questions: '+r.questions);text('Planned consultation: '+(r.consultation||'Not scheduled'));});
+    if(d.latest?.guidance){text('Existing mock reviewer guidance - simulation only',12,true);for(const k of ['assessment','limitations','nextAction','followUp','publishedAt'])text(k+': '+(d.latest.guidance[k]||'Not recorded'));}
+    heading('Limitations & provenance');bullets(d.limitations);text('Source originals are stored separately. Report photos may be resized for document size; missing or unreadable sources are explicitly labelled. The complete source inventory follows. Text uses a basic Latin PDF font; unsupported characters may appear as question marks.');
+    heading('Source photograph inventory',true);
+    let slot=0;
+    for(const s of d.timeline)for(const p of s.photos){if(slot===4){newPage();text('Source photograph inventory - continued',16);slot=0;}const x=slot%2?109:18,top=47+Math.floor(slot/2)*107;photo(p.id,x,top,83,78,s.date+' | '+p.view+' | '+p.id);slot++;}
+    const pages=pdf.getNumberOfPages();
+    for(let page=1;page<=pages;page++){pdf.setPage(page);pdf.setDrawColor(204,209,197);pdf.line(18,18,192,18);pdf.setFont('helvetica','bold');pdf.setFontSize(8);pdf.setTextColor(32,65,48);pdf.text('PROGRESSCHECK  /  MONITORING ASSESSMENT',18,13);pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.setTextColor(97,105,96);pdf.text(d.sample?'SIMULATED DATA - NOT A PATIENT REPORT':'RESEARCH DEMONSTRATION - NOT A DIAGNOSIS',18,286);pdf.text(page+' / '+pages,192,286,{align:'right'});}
+    return pdf.output('blob');
+  }
+  async function download(P,d){const blob=await create(P,d);P.downloadFile(d.reportId+'.pdf',blob);P.toast('Assessment PDF prepared. Check your downloads.');}
+  window.MonitoringPDF={create,download};
+})();

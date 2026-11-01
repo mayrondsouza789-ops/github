@@ -1,3 +1,4 @@
+import { validMonitoring } from './monitoring-validation';
 import { env } from "cloudflare:workers";
 import { getChatGPTUser } from "../app/chatgpt-auth";
 
@@ -139,7 +140,7 @@ async function route(request: Request): Promise<Response> {
     if (path === "/api/workspace" && request.method === "PUT") {
       const payload = await readJson(request);
       const { state, revision } = payload;
-      if (!state || typeof state !== "object" || Array.isArray(state) ||
+      if (!state || typeof state !== "object" || Array.isArray(state) || !validMonitoring(state.monitoring) ||
           typeof revision !== "number" || !Number.isSafeInteger(revision) || revision < 0 || revision >= Number.MAX_SAFE_INTEGER) {
         throw new ApiError(400, "Provide an object state and a non-negative integer revision.", "invalid_workspace");
       }

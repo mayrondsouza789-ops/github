@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const scriptURL = document.currentScript?.src || new URL('ml.js', document.baseURI).href;
-  const workerURL = new URL('ml-worker.js', scriptURL).href;
+  const workerURL = new URL('ml-worker.js?v=source-fingerprint-1', scriptURL).href;
   let active = null;
   let sequence = 0;
   const modelVersion = 'MediaPipe HairSegmenter float32/v1 | tasks-vision 0.10.21';

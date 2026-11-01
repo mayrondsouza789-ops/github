@@ -14,6 +14,18 @@ const compiled = ts.transpileModule(source, { compilerOptions: {
 } }).outputText;
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a6iUAAAAASUVORK5CYII=', 'base64');
 
+test('monitoring records round-trip and malformed updates cannot overwrite them', async () => {
+  const app = harness(); app.as('monitoring-test');
+  const state = {monitoring:{real:{routines:[],logs:[],reviews:[],nextDate:'2026-12-01',planNote:'TEST ONLY'}}};
+  const saved = await app.request('PUT','/api/workspace',{state,revision:0}); assert.equal(saved.status,200);
+  const revision = (await saved.json()).revision;
+  const read = await (await app.request('GET','/api/workspace')).json(); assert.deepEqual(read.state,state);
+  const invalid = structuredClone(state); invalid.monitoring.real.logs=[{routineId:'missing',completed:99}];
+  assert.equal((await app.request('PUT','/api/workspace',{state:invalid,revision})).status,400);
+  assert.deepEqual((await (await app.request('GET','/api/workspace')).json()).state,state);
+  app.as('different-test-user'); assert.equal((await (await app.request('GET','/api/workspace')).json()).state,null);
+});
+
 function harness() {
   const sqlite = new DatabaseSync(':memory:');
   for (const file of readdirSync(resolve(root, 'drizzle')).filter(name => name.endsWith('.sql')).sort()) {
@@ -52,6 +64,7 @@ function harness() {
   const context = vm.createContext({ exports, Request, Response, File, FormData, TextDecoder, TextEncoder, URL,
     Uint8Array, crypto: webcrypto,
     require(name) {
+      if (name === './monitoring-validation') { const e = {}; vm.runInNewContext(ts.transpileModule(readFileSync(resolve(root, 'server/monitoring-validation.ts'), 'utf8'), {compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText, {exports:e}); return e; }
       if (name === 'cloudflare:workers') return { env };
       if (name === '../app/chatgpt-auth') return { getChatGPTUser: async () => identity };
       throw new Error('Unexpected import: ' + name);

@@ -1,3 +1,4 @@
+import { validMonitoring } from './monitoring-validation';
 import { createServerClient, parseCookieHeader, serializeCookieHeader } from '@supabase/ssr';
 
 const MAX_PHOTO = 12 * 1024 * 1024;
@@ -75,7 +76,7 @@ async function route(request: Request): Promise<Response> {
     if(path === '/api/workspace' && request.method === 'GET') { const row=await current(); return json({state:row?.state ?? null,revision:row?.revision ?? 0,backend:'supabase',uploadMode:'signed',user:{id:owner,name:auth.user.email?.split('@')[0] || 'Your record'}}); }
     if(path === '/api/workspace' && request.method === 'PUT') {
       const {state,revision}=await readJson(request);
-      if(!validState(state) || !Number.isSafeInteger(revision) || revision < 0 || revision >= Number.MAX_SAFE_INTEGER) throw new ApiError(400,'Invalid workspace or revision.');
+      if(!validState(state) || !validMonitoring(state.monitoring) || !Number.isSafeInteger(revision) || revision < 0 || revision >= Number.MAX_SAFE_INTEGER) throw new ApiError(400,'Invalid workspace or revision.');
       const r=await client.rpc('pc_save_workspace',{new_state:state,expected_revision:revision}); check(r);
       if(!r.data?.length) return json({error:'Your workspace changed in another session. Reload before saving.',code:'revision_conflict'},409);
       return json({revision:r.data[0].revision});
