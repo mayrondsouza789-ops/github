@@ -1,6 +1,0 @@
-# Needed only to generate data / train / score (run locally, not on Vercel)
--r ../requirements.txt
-uvicorn[standard]>=0.29
-scikit-learn>=1.4
-xgboost>=2.0
-shap>=0.45
