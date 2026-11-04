@@ -1,0 +1,22 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const source=fs.readFileSync('dist/app.js','utf8').replace(/init\(\);\s*$/,'');
+const data=JSON.parse(fs.readFileSync('dist/data.json','utf8'));
+const context=vm.createContext({console,Intl,Date,URL,Blob,setTimeout,clearTimeout,window:{API_MODE:false},localStorage:{getItem:()=>null},sessionStorage:{getItem:()=>null},document:{addEventListener:()=>{}},payload:data});
+vm.runInContext(source+`
+D=payload;orderMap={};ticketMap={};eventMap={};
+for(const o of D.orders)(orderMap[o.customer]??=[]).push(o);
+for(const t of D.tickets)(ticketMap[t.customer]??=[]).push(t);
+for(const e of D.engagements)(eventMap[e.customer]??=[]).push(e);
+refresh();
+globalThis.result={customers:customers.length,metrics:metrics(customers),riskCounts:Object.keys(colors).map(k=>customers.filter(c=>c.risk===k).length),cohorts:cohortRows(),products:productRows(),filtered:filtered().length,due:new Date(date(customers[4794].last).getTime()+customers[4794].cycle*86400000).toISOString().slice(0,10)};
+`,context);
+const r=context.result;
+assert.equal(r.customers,5000);assert.equal(r.riskCounts.reduce((a,b)=>a+b,0),5000);
+assert.equal(r.filtered,5000);
+assert.equal(r.metrics.rev,data.orders.filter(o=>o.status==='completed').reduce((s,o)=>s+o.amount,0));
+assert(r.metrics.retention>=0&&r.metrics.retention<=1);
+assert(Math.abs(r.metrics.churn+r.metrics.retention-1)<1e-10);
+assert(r.cohorts.every(c=>c.values[0]===1&&c.values.every(v=>v===null||v>=0&&v<=1)));
+assert.equal(r.due,'2026-07-19');
+assert(r.products.every(p=>p.refund>=0&&p.refund<=1));
+console.log('PASS: dataset totals, risk coverage, revenue reconciliation, retention complement, cohort bounds, product bounds, and product-specific replenishment dates.');

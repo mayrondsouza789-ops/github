@@ -1,0 +1,558 @@
+{
+  "version": "rr2-20261101T165216Z",
+  "selected": "Logistic regression",
+  "trained": "2026-11-01T16:52:16.211549+00:00",
+  "dataset_version": "b5b23478648c",
+  "horizon": 30,
+  "grace": 14,
+  "threshold": 0.5,
+  "features": [
+    "recency_ratio",
+    "order_count",
+    "average_interval",
+    "interval_variability",
+    "cancellations",
+    "refund_rate",
+    "ticket_count",
+    "engagement_30d",
+    "engagement_change",
+    "spend",
+    "average_order_value",
+    "tenure",
+    "discount_fraction",
+    "category_diversity"
+  ],
+  "metrics": {
+    "Logistic regression": {
+      "precision": 0.711340206185567,
+      "recall": 0.6106194690265486,
+      "f1": 0.6571428571428571,
+      "roc_auc": 0.8911898534627923,
+      "pr_auc": 0.7100596464675144,
+      "brier": 0.1315295560329005,
+      "confusion": [
+        [
+          219,
+          28
+        ],
+        [
+          44,
+          69
+        ]
+      ],
+      "calibration": [
+        [
+          0.09121553174028817,
+          0.021621621621621623
+        ],
+        [
+          0.23821461488327586,
+          0.4489795918367347
+        ],
+        [
+          0.41382177028426204,
+          0.6206896551724138
+        ],
+        [
+          0.595365587789687,
+          0.7142857142857143
+        ],
+        [
+          0.7717485463397976,
+          0.7096774193548387
+        ]
+      ],
+      "precision_at_k": 0.6944444444444444,
+      "recall_at_k": 0.4424778761061947,
+      "lift": 2.2123893805309733,
+      "capacity": 72,
+      "population": 360
+    },
+    "Random forest": {
+      "precision": 0.6711409395973155,
+      "recall": 0.8849557522123894,
+      "f1": 0.7633587786259542,
+      "roc_auc": 0.8900075239153021,
+      "pr_auc": 0.7159777048713141,
+      "brier": 0.12398458642749327,
+      "confusion": [
+        [
+          198,
+          49
+        ],
+        [
+          13,
+          100
+        ]
+      ],
+      "calibration": [
+        [
+          0.09638243385265868,
+          0.0
+        ],
+        [
+          0.2193563684378336,
+          0.11538461538461539
+        ],
+        [
+          0.4389100407686055,
+          0.3684210526315789
+        ],
+        [
+          0.5861023807554733,
+          0.6527777777777778
+        ],
+        [
+          0.7405337033282524,
+          0.6716417910447762
+        ],
+        [
+          0.8510384232428405,
+          0.8
+        ]
+      ],
+      "precision_at_k": 0.7083333333333334,
+      "recall_at_k": 0.45132743362831856,
+      "lift": 2.256637168141593,
+      "capacity": 72,
+      "population": 360
+    },
+    "Gradient boosting": {
+      "precision": 0.7,
+      "recall": 0.5575221238938053,
+      "f1": 0.6206896551724138,
+      "roc_auc": 0.8915839633119558,
+      "pr_auc": 0.7168210218442631,
+      "brier": 0.13356103099708383,
+      "confusion": [
+        [
+          220,
+          27
+        ],
+        [
+          50,
+          63
+        ]
+      ],
+      "calibration": [
+        [
+          0.02812304816969118,
+          0.04926108374384237
+        ],
+        [
+          0.23951920347156921,
+          0.5666666666666667
+        ],
+        [
+          0.4471670887263531,
+          0.6216216216216216
+        ],
+        [
+          0.5798012787012268,
+          0.66
+        ],
+        [
+          0.7174401712678626,
+          0.8
+        ],
+        [
+          0.8865928177211231,
+          0.72
+        ]
+      ],
+      "precision_at_k": 0.7361111111111112,
+      "recall_at_k": 0.4690265486725664,
+      "lift": 2.345132743362832,
+      "capacity": 72,
+      "population": 360
+    }
+  },
+  "validation": {
+    "Logistic regression": 0.7851689946928386,
+    "Random forest": 0.730159934270395,
+    "Gradient boosting": 0.7580080807177008
+  },
+  "splitCounts": [
+    781,
+    308,
+    360
+  ],
+  "splitDates": [
+    "2026-04-01",
+    "2026-06-15",
+    "2026-09-01"
+  ],
+  "target": "First commercial inactivity episode within 30 days among currently active purchasers. Product-specific refill date plus 14-day grace; future orders extend coverage.",
+  "explanation": "Signed one-feature replacement sensitivity against training medians, through the calibrated model. Associations are not causes.",
+  "unavailable": [
+    "SKU and pack size",
+    "Multi-item orders",
+    "Subscriptions",
+    "App activity",
+    "Timestamped support resolution",
+    "Confirmed treatment discontinuation"
+  ],
+  "accepted": true,
+  "quality": {
+    "issues": [],
+    "orders": 11081,
+    "customers": 5000
+  },
+  "subgroups": [
+    {
+      "product": "Minoxidil",
+      "precision": 0.6,
+      "recall": 0.5357142857142857,
+      "f1": 0.5660377358490566,
+      "roc_auc": 0.7554112554112554,
+      "pr_auc": 0.6879225197560122,
+      "brier": 0.2166286978605115,
+      "confusion": [
+        [
+          23,
+          10
+        ],
+        [
+          13,
+          15
+        ]
+      ],
+      "calibration": [
+        [
+          0.09742884885372702,
+          0.1
+        ],
+        [
+          0.2632104588697306,
+          0.5
+        ],
+        [
+          0.4365223653897088,
+          1.0
+        ],
+        [
+          0.5925688220340136,
+          0.5
+        ],
+        [
+          0.7922516413513189,
+          0.631578947368421
+        ]
+      ],
+      "precision_at_k": 0.75,
+      "recall_at_k": 0.32142857142857145,
+      "lift": 1.6339285714285714,
+      "capacity": 12,
+      "population": 61
+    },
+    {
+      "product": "Hair gummies",
+      "precision": 0.375,
+      "recall": 0.3,
+      "f1": 0.3333333333333333,
+      "roc_auc": 0.8153846153846154,
+      "pr_auc": 0.5275546675546675,
+      "brier": 0.19700291741307197,
+      "confusion": [
+        [
+          21,
+          5
+        ],
+        [
+          7,
+          3
+        ]
+      ],
+      "calibration": [
+        [
+          0.09484108820577167,
+          0.0
+        ],
+        [
+          0.23741205414440109,
+          0.8571428571428571
+        ],
+        [
+          0.4460269088223327,
+          0.5
+        ],
+        [
+          0.55723217935495,
+          0.5
+        ],
+        [
+          0.7901828265257674,
+          0.3333333333333333
+        ]
+      ],
+      "precision_at_k": 0.2857142857142857,
+      "recall_at_k": 0.2,
+      "lift": 1.0285714285714285,
+      "capacity": 7,
+      "population": 36
+    },
+    {
+      "product": "DHT shampoo",
+      "precision": 0.7142857142857143,
+      "recall": 0.5882352941176471,
+      "f1": 0.6451612903225806,
+      "roc_auc": 0.8725490196078431,
+      "pr_auc": 0.6694247072730044,
+      "brier": 0.14180068710913246,
+      "confusion": [
+        [
+          32,
+          4
+        ],
+        [
+          7,
+          10
+        ]
+      ],
+      "calibration": [
+        [
+          0.09516927408396816,
+          0.04
+        ],
+        [
+          0.23081755559946812,
+          0.2222222222222222
+        ],
+        [
+          0.44021105170542985,
+          0.8
+        ],
+        [
+          0.587764754419165,
+          0.8571428571428571
+        ],
+        [
+          0.7715584346218252,
+          0.5714285714285714
+        ]
+      ],
+      "precision_at_k": 0.7,
+      "recall_at_k": 0.4117647058823529,
+      "lift": 2.1823529411764704,
+      "capacity": 10,
+      "population": 53
+    },
+    {
+      "product": "Haircare kit",
+      "precision": 0.85,
+      "recall": 0.85,
+      "f1": 0.85,
+      "roc_auc": 0.9638461538461539,
+      "pr_auc": 0.8377009160116121,
+      "brier": 0.07162990081546311,
+      "confusion": [
+        [
+          62,
+          3
+        ],
+        [
+          3,
+          17
+        ]
+      ],
+      "calibration": [
+        [
+          0.08481072042959673,
+          0.0
+        ],
+        [
+          0.2186936796538007,
+          0.2222222222222222
+        ],
+        [
+          0.412066334371951,
+          0.25
+        ],
+        [
+          0.6040504958467667,
+          0.7777777777777778
+        ],
+        [
+          0.7444303988595482,
+          0.9090909090909091
+        ]
+      ],
+      "precision_at_k": 0.8235294117647058,
+      "recall_at_k": 0.7,
+      "lift": 3.5,
+      "capacity": 17,
+      "population": 85
+    },
+    {
+      "product": "Scalp treatment",
+      "precision": 0.8,
+      "recall": 0.631578947368421,
+      "f1": 0.7058823529411765,
+      "roc_auc": 0.9317211948790897,
+      "pr_auc": 0.865168478978158,
+      "brier": 0.11818310640973016,
+      "confusion": [
+        [
+          34,
+          3
+        ],
+        [
+          7,
+          12
+        ]
+      ],
+      "calibration": [
+        [
+          0.09220743907506414,
+          0.034482758620689655
+        ],
+        [
+          0.22311274266871475,
+          0.375
+        ],
+        [
+          0.387201079036058,
+          0.75
+        ],
+        [
+          0.623287379528135,
+          0.8
+        ],
+        [
+          0.766569008785087,
+          0.8
+        ]
+      ],
+      "precision_at_k": 0.7272727272727273,
+      "recall_at_k": 0.42105263157894735,
+      "lift": 2.1435406698564594,
+      "capacity": 11,
+      "population": 56
+    },
+    {
+      "product": "Hair serum",
+      "precision": 0.8,
+      "recall": 0.631578947368421,
+      "f1": 0.7058823529411765,
+      "roc_auc": 0.9389473684210528,
+      "pr_auc": 0.8381291661554817,
+      "brier": 0.09886887870201626,
+      "confusion": [
+        [
+          47,
+          3
+        ],
+        [
+          7,
+          12
+        ]
+      ],
+      "calibration": [
+        [
+          0.09152276678385017,
+          0.0
+        ],
+        [
+          0.25800401715721083,
+          0.6666666666666666
+        ],
+        [
+          0.3864398020126872,
+          0.375
+        ],
+        [
+          0.5834456067548878,
+          0.6666666666666666
+        ],
+        [
+          0.755466467842123,
+          0.8888888888888888
+        ]
+      ],
+      "precision_at_k": 0.8461538461538461,
+      "recall_at_k": 0.5789473684210527,
+      "lift": 3.0728744939271255,
+      "capacity": 13,
+      "population": 69
+    }
+  ],
+  "monitoring": [
+    {
+      "feature": "recency_ratio",
+      "missing_rate": 0.0,
+      "standardised_shift": 0.08364021648864761
+    },
+    {
+      "feature": "order_count",
+      "missing_rate": 0.0,
+      "standardised_shift": 1.2093074678462297
+    },
+    {
+      "feature": "average_interval",
+      "missing_rate": 0.35202665186007775,
+      "standardised_shift": 0.35066128491353665
+    },
+    {
+      "feature": "interval_variability",
+      "missing_rate": 0.35202665186007775,
+      "standardised_shift": 0.9853939763041548
+    },
+    {
+      "feature": "cancellations",
+      "missing_rate": 0.0,
+      "standardised_shift": 0.3477213064543813
+    },
+    {
+      "feature": "refund_rate",
+      "missing_rate": 0.0,
+      "standardised_shift": 0.08294097014562309
+    },
+    {
+      "feature": "ticket_count",
+      "missing_rate": 0.0,
+      "standardised_shift": 0.1530288770184367
+    },
+    {
+      "feature": "engagement_30d",
+      "missing_rate": 0.0,
+      "standardised_shift": 2.3482896634887194
+    },
+    {
+      "feature": "engagement_change",
+      "missing_rate": 0.0,
+      "standardised_shift": 1.1043715079983725
+    },
+    {
+      "feature": "spend",
+      "missing_rate": 0.0,
+      "standardised_shift": 1.0579773389624834
+    },
+    {
+      "feature": "average_order_value",
+      "missing_rate": 0.0,
+      "standardised_shift": 0.07208696962384949
+    },
+    {
+      "feature": "tenure",
+      "missing_rate": 0.0,
+      "standardised_shift": 1.4150158926256047
+    },
+    {
+      "feature": "discount_fraction",
+      "missing_rate": 0.0,
+      "standardised_shift": 0.0070263440079842586
+    },
+    {
+      "feature": "category_diversity",
+      "missing_rate": 0.0,
+      "standardised_shift": 0.0
+    }
+  ],
+  "scored": 1801,
+  "forecast": {
+    "expected": 541.8512581935585,
+    "lower": 511.475,
+    "upper": 574.0,
+    "method": "95% conditional Poisson-binomial simulation interval; assumes independent customers and fixed calibrated probabilities. Excludes parameter uncertainty and domain shift."
+  }
+}
