@@ -1,11 +1,17 @@
-# Retention Radar visual release - 4 November 2026
+# Retention Radar — product interface release
 
-Refreshed all ten workspaces and settings with shared typography and spacing, restrained navigation, chart sections, customer drawers, comparison tables, report previews and export history. Cohort rows open customer drill-downs. Motion respects reduced-motion preferences.
+## Design
+Warm neutral surfaces, dark ink typography, forest interaction accents, grouped navigation, a radar identity, readable typographic KPI bands, and a shared table/form/board system across all ten workspaces and settings. Existing data relationships, ML outputs and API contracts are preserved.
 
-The synthetic dataset, exported model predictions, API and backend remain intact. JavaScript syntax checks and analytics reconciliation checks pass. All desktop workspaces were visually reviewed during implementation. Final mobile browser checks remain pending because browser automation became unavailable.
+Charts use bounded cubic segments through actual data points, responsive SVGs, keyboard-focusable points and custom hover/focus tooltips. Metric transitions settle in 420 ms, retain the final accessible value, and skip unchanged values. Reduced-motion preferences disable animation. The sidebar remembers its collapsed state. Mobile navigation provides a scrim, Escape dismissal and keyboard focus containment.
 
-## Hosting
+## Verification
+- JavaScript syntax and analytics reconciliation checks passed.
+- All eleven screens rendered at desktop and 390 px mobile widths without page-level horizontal overflow; tables scroll within their containers.
+- Overview checked at 820 px tablet width.
+- Exact customer search, no-results recovery, customer profile, keyboard cohort drill-down, revenue cohort view, analytical question, action board/table, model tabs, sidebar collapse and CSV download verified in the browser.
+- Fixed Enter opening and immediately closing cohort drawers by preventing the key default action before moving focus.
+- No browser console errors were reported during the checks.
 
-Vercel publishes only dist/. Its build runs node analytics-check.cjs. Select retention-radar as the root directory when importing the parent GitHub repository. No dependencies or secrets are needed for the hosted demo.
-
-The included FastAPI/PostgreSQL backend is a separate local installation. Browser-local actions, simulated campaigns and demo role switching are not production database operations or authentication. See TRANSFORMATION.md for model and production limitations.
+## Hosting boundaries
+The public Vercel build serves the synthetic demonstration in dist/. Operations remain browser-local. The included FastAPI/PostgreSQL backend remains a separate installation; it is not deployed with the static frontend. See TRANSFORMATION.md for model and production limitations.
