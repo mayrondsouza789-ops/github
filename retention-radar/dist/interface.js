@@ -2,28 +2,153 @@
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 let metricSnapshot = new Map();
 
+const mobileLayout = matchMedia('(max-width: 850px)');
+const shellPaths = {
+  search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/>',
+  menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+  collapse: '<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16m7-11-3 3 3 3"/>',
+  chevron: '<path d="m9 6 6 6-6 6"/>',
+  download: '<path d="M12 3v12m-5-5 5 5 5-5M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>'
+};
+
+function shellIcon(name) {
+  return `<svg class="shell-icon" viewBox="0 0 24 24" aria-hidden="true">${shellPaths[name]}</svg>`;
+}
+
+function syncMenuAccess() {
+  const open = mobileLayout.matches && document.body.classList.contains('show-menu');
+  const sidebar = document.querySelector('.sidebar');
+  const main = document.querySelector('.main');
+  if (!sidebar || !main) return;
+  sidebar.inert = mobileLayout.matches && !open;
+  main.inert = open;
+  document.querySelector('.mobile-menu').setAttribute('aria-expanded', String(open));
+}
+
 function toggleNavigation(force) {
   const open = force ?? !document.body.classList.contains('show-menu');
   document.body.classList.toggle('show-menu', open);
-  document.querySelector('.mobile-menu')?.setAttribute('aria-expanded', String(open));
-  if (open) document.querySelector('.nav .active')?.focus();
+  syncMenuAccess();
+  if (open) document.querySelector('.sidebar [aria-current="page"]')?.focus();
   else document.querySelector('.mobile-menu')?.focus();
 }
+
+mobileLayout.addEventListener('change', () => {
+  document.body.classList.remove('show-menu');
+  syncMenuAccess();
+});
+
 function toggleSidebar() {
   const collapsed = document.body.classList.toggle('collapsed');
   put('sidebar-collapsed', collapsed);
   const button = document.querySelector('.collapse-btn');
-  button?.setAttribute('aria-expanded', String(!collapsed));
-  button?.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+  button.setAttribute('aria-expanded', String(!collapsed));
+  button.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
 }
-const radarMark = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 12l6-6"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>';
+
+const radarMark = '<svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12"/><circle cx="16" cy="16" r="7.5"/><path d="M16 16 27 5"/><circle class="radar-contact" cx="22" cy="10" r="2.4"/><circle class="radar-origin" cx="16" cy="16" r="1.7"/></svg>';
+
+const menuGroups = [
+  ['Workspace', [[0,'Overview'],[1,'Customers'],[2,'Churn intelligence'],[3,'Segments']]],
+  ['Operations', [[4,'Retention actions'],[5,'Campaigns']]],
+  ['Analytics', [[6,'Cohorts'],[7,'Products'],[8,'Model intelligence'],[9,'Reports']]]
+];
+
+function workspaceNavigation() {
+  return menuGroups.map(([heading, items]) => `
+    <div class="nav-label">${heading}</div>
+    ${items.map(([index, label]) => `<button type="button" title="${navs[index]}"
+        aria-label="${navs[index]}" data-route="${navs[index]}" onclick="navigate('${navs[index]}')">
+      <span class="nav-icon">${navIcon(index)}</span><span class="label">${label}</span>
+      ${index === 4 ? '<span class="count" aria-hidden="true"></span>' : ''}
+    </button>`).join('')}`).join('');
+}
+
+function findCustomer(event) {
+  event.preventDefault();
+  const search = document.getElementById('workspace-search');
+  const term = search.value.trim();
+  // A global search starts with every customer, including after a scoped drill-down.
+  query = term;
+  riskFilter = segmentFilter = productFilter = channelFilter = valueFilter = lastFilter = frequencyFilter = '';
+  filtersExpanded = true;
+  navigate('Customer Intelligence', true);
+  const listSearch = document.querySelector('.filters input');
+  listSearch?.focus({preventScroll: true});
+}
+
+function mountWorkspace(app) {
+  const collapsed = getStore('sidebar-collapsed', false);
+  document.body.classList.toggle('collapsed', collapsed);
+  const shortcut = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘ K' : 'Ctrl K';
+  app.innerHTML = `
+    <a class="skip-link" href="#content" onclick="event.preventDefault();document.getElementById('content').focus()">Skip to workspace</a>
+    <button class="nav-scrim" type="button" tabindex="-1" aria-label="Close navigation" onclick="toggleNavigation(false)"></button>
+    <aside class="sidebar" id="workspace-sidebar" aria-label="Workspace navigation">
+      <div class="brand"><span class="brand-icon">${radarMark}</span><span class="brand-text">Retention Radar</span></div>
+      <button class="collapse-btn" type="button" aria-label="${collapsed ? 'Expand' : 'Collapse'} sidebar"
+        aria-controls="workspace-sidebar" aria-expanded="${!collapsed}" onclick="toggleSidebar()">${shellIcon('collapse')}</button>
+      <div class="workspace"><span class="mm" aria-hidden="true">m.</span>
+        <div><strong>Man Matters</strong><small>Retention workspace</small></div></div>
+      <nav class="nav" aria-label="Main navigation">${workspaceNavigation()}</nav>
+      <div class="side-bottom">
+        <button type="button" class="settings-link" title="Settings" aria-label="Settings"
+          data-route="Settings" onclick="navigate('Settings')">${navIcon(10)}<span class="label">Settings</span></button>
+        <div class="user"><span class="avatar">AS</span><div><strong>Ananya Sharma</strong><small class="user-role"></small></div></div>
+      </div>
+    </aside>
+    <main class="main" data-radar-shell>
+      <header class="topbar"><div class="crumb-group">
+        <button class="mobile-menu" type="button" aria-label="Toggle navigation"
+          aria-controls="workspace-sidebar" aria-expanded="false" onclick="toggleNavigation()">${shellIcon('menu')}</button>
+        <span class="breadcrumb"><span class="crumb-workspace">Workspace</span>${shellIcon('chevron')}<b class="current-workspace"></b></span>
+      </div><div class="top-actions">
+        <form class="global-search" role="search" onsubmit="findCustomer(event)">${shellIcon('search')}
+          <input type="search" id="workspace-search" aria-label="Global customer search" placeholder="Find a customer…" autocomplete="off">
+          <kbd aria-hidden="true">${shortcut}</kbd></form>
+        <span class="workspace-status" title="This workspace uses synthetic customer records"><i></i>Synthetic data</span>
+      </div></header>
+      <section class="content" id="content" tabindex="-1" aria-label="Workspace content"></section>
+    </main>`;
+}
+
 shell = function () {
-  const groups = [['INTELLIGENCE',[0,1,2,3,6,7]],['OPERATIONS',[4,5]],['GOVERNANCE',[8,9]]];
-  const nav = groups.map(([label,ids],g) => `<div class="nav-label ${g?'nav-divider':''}">${label}</div>${ids.map(i => {const name=navs[i];return `<button title="${name}" aria-current="${view===name?'page':'false'}" class="${view===name?'active':''}" onclick="navigate('${name}')"><span class="nav-icon">${navIcon(i)}</span><span class="label">${name}</span>${i===4?`<span class="count">${interventions.filter(x=>!['Resolved','Unsuccessful'].includes(x.status)).length}</span>`:''}</button>`}).join('')}`).join('');
-  document.body.classList.toggle('collapsed', getStore('sidebar-collapsed', false));
-  document.getElementById('app').innerHTML = `<a class="skip-link" href="#content" onclick="event.preventDefault();document.getElementById('content').focus()">Skip to workspace</a><button class="nav-scrim" aria-label="Close navigation" onclick="toggleNavigation(false)"></button><aside class="sidebar" aria-label="Workspace navigation"><div class="brand"><span class="brand-icon">${radarMark}</span><span class="brand-text">Retention<span class="brand-second">Radar</span></span></div><button class="collapse-btn" aria-label="${document.body.classList.contains('collapsed')?'Expand':'Collapse'} sidebar" aria-expanded="${!document.body.classList.contains('collapsed')}" onclick="toggleSidebar()">‹</button><div class="workspace"><span class="mm">m.</span><div><strong>Man Matters</strong><small>Customer intelligence</small></div></div><nav class="nav">${nav}</nav><div class="side-bottom"><button class="settings-link" title="Settings" onclick="navigate('Settings')">${navIcon(10)}<span class="label">Workspace settings</span></button><div class="user"><span class="avatar">AS</span><div><strong>Ananya Sharma</strong><small>${esc(settings.role)}</small></div></div></div></aside><main class="main"><header class="topbar"><div class="crumb-group"><button class="mobile-menu" aria-label="Toggle navigation" aria-expanded="false" onclick="toggleNavigation()">☰</button><span class="breadcrumb">Workspace <span class="slash">/</span> <b>${view}</b></span></div><div class="top-actions"><input aria-label="Global customer search" placeholder="Find a customer…" onkeydown="if(event.key==='Enter'){query=this.value;navigate('Customer Intelligence',true)}"><span class="workspace-status"><i></i> Demo workspace</span></div></header><div class="demo"><span class="demo-label">SYNTHETIC DATA</span><span>A demonstration. No actual Man Matters customer records.</span><span>Snapshot · 01 Nov 2026</span></div><section class="content" id="content" tabindex="-1"></section></main>`;
+  const app = document.getElementById('app');
+  if (!app.querySelector('[data-radar-shell]')) mountWorkspace(app);
+  const active = document.activeElement;
+  const returningFromMenu = mobileLayout.matches && active?.closest('.sidebar');
+  for (const button of app.querySelectorAll('[data-route]')) {
+    const current = button.dataset.route === view;
+    button.classList.toggle('active', current);
+    if (current) button.setAttribute('aria-current', 'page');
+    else button.removeAttribute('aria-current');
+  }
+  app.querySelector('.current-workspace').textContent = view;
+  app.querySelector('.user-role').textContent = settings.role;
+  const count = app.querySelector('.nav .count');
+  const outstanding = interventions.filter(item => !['Resolved','Unsuccessful'].includes(item.status)).length;
+  count.textContent = outstanding;
+  count.hidden = !outstanding;
+  const search = app.querySelector('#workspace-search');
+  if (document.activeElement !== search) search.value = '';
+  document.title = `${view} · Retention Radar`;
+  syncMenuAccess();
   renderContent();
+  if (returningFromMenu) app.querySelector('#content').focus({preventScroll: true});
 };
+
+document.addEventListener('keydown', event => {
+  const search = document.getElementById('workspace-search');
+  if (!search || document.querySelector('.drawer') || document.body.classList.contains('show-menu')) return;
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault();
+    search.focus();
+    search.select();
+  } else if (event.key === 'Escape' && document.activeElement === search) {
+    search.value = '';
+    search.blur();
+  }
+});
 
 /* Horizontal Bezier tangents stay inside the endpoint range; no invented extrema. */
 function trendPath(points) {

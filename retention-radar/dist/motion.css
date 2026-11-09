@@ -1,0 +1,81 @@
+:root {
+  --rr-ease-out: cubic-bezier(.22, 1, .36, 1);
+  --rr-ease-standard: cubic-bezier(.2, .72, .22, 1);
+}
+
+/* The renderer also runs while typing, filtering and sorting. Only actual
+   screen changes receive a page entrance from motion.js. */
+.rr-motion #content.view-enter > *,
+.rr-motion #content .trend-line,
+.rr-motion .overlay-backdrop .drawer {
+  animation: none;
+}
+
+.rr-motion .nav button.rr-moving-selection {
+  position: relative;
+  isolation: isolate;
+  background-color: transparent;
+  box-shadow: none;
+  transition: none;
+}
+
+.rr-nav-marker {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--rr-selection-fill);
+  box-shadow: var(--rr-selection-shadow);
+  pointer-events: none;
+}
+
+.rr-motion .overlay-backdrop[data-closing] {
+  pointer-events: auto;
+}
+
+.rr-motion .overlay-backdrop[data-closing] .drawer {
+  pointer-events: none;
+}
+
+.rr-motion .trend-point .point-guide,
+.rr-motion .trend-point circle:first-of-type {
+  transition: opacity 140ms ease, r 170ms var(--rr-ease-out);
+}
+
+/* Keep the transparent hover target stable as the visible data point grows. */
+.rr-motion .trend-point circle:last-child {
+  r: 13;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rr-motion button,
+  .rr-motion input,
+  .rr-motion select,
+  .rr-motion textarea {
+    transition: color 150ms ease, background-color 150ms ease,
+      border-color 150ms ease, box-shadow 180ms ease, transform 170ms var(--rr-ease-out);
+  }
+
+  .rr-motion .sidebar,
+  .rr-motion .main {
+    transition-timing-function: var(--rr-ease-standard);
+  }
+
+  .rr-motion .chart-tooltip {
+    transition: opacity 110ms ease, transform 160ms var(--rr-ease-out);
+  }
+
+  .rr-motion tbody tr[tabindex],
+  .rr-motion tbody tr[onclick] {
+    transition: background-color 130ms ease;
+  }
+
+  .rr-motion #toast {
+    animation: rr-toast-in 210ms var(--rr-ease-out);
+  }
+}
+
+@keyframes rr-toast-in {
+  from { opacity: .3; translate: 0 6px; }
+  to { opacity: 1; translate: 0 0; }
+}

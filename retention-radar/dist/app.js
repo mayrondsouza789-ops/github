@@ -23,7 +23,56 @@ function stage(c){if(c.count===1&&days(D.asOf,c.first)<45)return 'New';if(c.over
 function refresh(){customers=D.customers.map(c=>{const os=orderMap[c.id]||[],completed=os.filter(x=>x.status==='completed'),p=D.products[c.product],last=completed.at(-1)?.date||c.first,gaps=completed.slice(1).map((o,i)=>days(o.date,completed[i].date)),lastDays=days(D.asOf,last),openTickets=(ticketMap[c.id]||[]).filter(t=>t.status==='Open').length;const z={...c,orders:os,completed,count:completed.length,revenue:completed.reduce((s,o)=>s+o.amount,0),last,cycle:p.cycle,overdue:lastDays-p.cycle,lastDays,freq:gaps.length?gaps.reduce((s,v)=>s+v,0)/gaps.length:0,recovered:gaps.some(g=>g>p.cycle*1.6),openTickets,cancellations:os.filter(o=>o.status==='cancelled').length,engagement:(eventMap[c.id]||[]).filter(e=>days(D.asOf,e.date)<=30).length,risk:risk(c.probability)};z.stage=stage(z);return z})}
 function scoped(){return customers.filter(c=>(!channelFilter||c.channel===channelFilter)&&(!productFilter||c.product===Number(productFilter)-1))}
 function filtered(){return scoped().filter(c=>(!query||(c.name+' '+c.code).toLowerCase().includes(query.toLowerCase()))&&(!riskFilter||c.risk===riskFilter)&&(!segmentFilter||(segmentFilter==='High-Value'?c.revenue>=5000:c.stage===segmentFilter))&&(!valueFilter||c.revenue>Number(valueFilter))&&(!lastFilter||c.lastDays>=Number(lastFilter))&&(!frequencyFilter||c.freq>=Number(frequencyFilter))).sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='value'?b.revenue-a.revenue:(b.probability??-1)-(a.probability??-1))}
-function metrics(list,asof=D.asOf){let active=0,riskn=0,churn=0,repeat=0,rev=0,atrisk=0,retained=0,eligible=0,recent=0;for(const c of list){const os=c.completed.filter(o=>o.date<asof),last=os.at(-1);if(!last)continue;eligible++;const since=days(asof,last.date),late=since>c.cycle+settings.grace;active+=!late;churn+=late;repeat+=os.length>1;rev+=os.reduce((s,o)=>s+o.amount,0);if(asof===D.asOf){riskn+=['High','Critical'].includes(c.risk);atrisk+=['High','Critical'].includes(c.risk)?c.revenue*c.probability:0}else{riskn+=late;atrisk+=late?os.reduce((s,o)=>s+o.amount,0):0}const start=new Date(date(asof)-period*86400000).toISOString().slice(0,10);recent+=os.filter(o=>o.date>=start).reduce((s,o)=>s+o.amount,0);retained+=os.slice(1).filter(o=>o.date>=start).reduce((s,o)=>s+o.amount,0)}return {active,riskn,pred:list.filter(c=>c.probability!=null).reduce((s,c)=>s+c.probability,0)/Math.max(1,list.filter(c=>c.probability!=null).length),retention:active/Math.max(1,eligible),repeat:repeat/Math.max(1,eligible),clv:rev/Math.max(1,eligible),atrisk,retained,rev,recent,churn:churn/Math.max(1,eligible),eligible}}
+function metrics(list, asof = D.asOf) {
+  const asofTime = date(asof).getTime();
+  const periodStart = new Date(asofTime - period * 86400000).toISOString().slice(0, 10);
+  const currentSnapshot = asof === D.asOf;
+  const daysSincePurchase = new Map();
+  let active = 0, eligible = 0, repeatBuyers = 0, riskn = 0, scored = 0;
+  let probability = 0, rev = 0, atrisk = 0, recent = 0, retained = 0;
+
+  for (const customer of list) {
+    if (customer.probability != null) {
+      probability += customer.probability;
+      scored++;
+    }
+    let lastDate, count = 0, revenue = 0, periodRevenue = 0, repeatRevenue = 0;
+    for (const order of customer.completed) {
+      if (order.date >= asof) continue;
+      if (order.date >= periodStart) {
+        periodRevenue += order.amount;
+        if (count > 0) repeatRevenue += order.amount;
+      }
+      lastDate = order.date;
+      revenue += order.amount;
+      count++;
+    }
+    if (!count) continue;
+
+    let since = daysSincePurchase.get(lastDate);
+    if (since === undefined) {
+      since = Math.floor((asofTime - date(lastDate).getTime()) / 86400000);
+      daysSincePurchase.set(lastDate, since);
+    }
+    const late = since > customer.cycle + settings.grace;
+    const atRisk = currentSnapshot ? customer.risk === 'High' || customer.risk === 'Critical' : late;
+    eligible++;
+    active += !late;
+    repeatBuyers += count > 1;
+    riskn += atRisk;
+    if (atRisk) atrisk += currentSnapshot ? customer.revenue * customer.probability : revenue;
+    rev += revenue;
+    recent += periodRevenue;
+    retained += repeatRevenue;
+  }
+
+  const buyers = Math.max(1, eligible);
+  return {
+    active, riskn, pred: probability / Math.max(1, scored), retention: active / buyers,
+    repeat: repeatBuyers / buyers, clv: rev / buyers, atrisk, retained, rev, recent,
+    churn: (eligible - active) / buyers, eligible
+  };
+}
 function shell(){document.getElementById('app').innerHTML=`<aside class="sidebar"><div class="brand"><span class="brand-icon">R</span><span class="brand-text">retention radar<span style="color:#b4d397">.</span></span></div><button class="collapse-btn" aria-label="Collapse sidebar" onclick="document.body.classList.toggle('collapsed')">‹</button><div class="workspace"><span class="mm">mm.</span><div><strong>Man Matters</strong><small>Retention workspace</small></div><span style="margin-left:auto">⌄</span></div><div class="nav-label">WORKSPACE</div><nav class="nav">${navs.map((n,i)=>`${i===8?'<div class="nav-label" style="margin-top:20px">MANAGEMENT</div>':''}<button title="${n}" class="${view===n?'active':''}" onclick="navigate('${n}')"><span class="nav-icon">${navIcon(i)}</span><span class="label">${n}</span>${n==='Retention Actions'?`<span class="count">${interventions.filter(x=>!['Resolved','Unsuccessful'].includes(x.status)).length}</span>`:''}</button>`).join('')}</nav><div class="side-bottom"><div class="health"><i></i> Synthetic workspace · v2</div><div class="user"><span class="avatar">AS</span><div><strong>Ananya Sharma</strong><small>${esc(settings.role)}</small></div></div></div></aside><main class="main"><header class="topbar"><div style="display:flex;align-items:center;gap:10px"><button class="mobile-menu" aria-label="Toggle navigation" onclick="document.body.classList.toggle('show-menu')">☰</button><div class="breadcrumb">Workspace <span style="margin:0 10px">/</span><b>${view}</b></div></div><div class="top-actions"><input aria-label="Global customer search" placeholder="⌕  Search customers…" onkeydown="if(event.key==='Enter'){query=this.value;navigate('Customer Intelligence',true)}"><span class="badge"><i class="status-dot"></i> Demo workspace</span><span class="avatar">AS</span></div></header><div class="demo"><span>ⓘ</span><strong>Synthetic demo data</strong><span>Explore freely. These records do not represent actual Man Matters customers.</span><span>As of 01 Nov 2026</span></div><section class="content" id="content"></section></main>`;renderContent()}
 function navigate(n,keep=false){view=n;page=1;if(!keep){query='';riskFilter='';segmentFilter='';productFilter='';channelFilter='';valueFilter='';lastFilter='';frequencyFilter=''}document.body.classList.remove('show-menu');history.replaceState(null,'','#'+encodeURIComponent(n));shell();window.scrollTo(0,0)}
 function header(title,sub,actions=true){return `<div class="page-head"><div><h1>${title}</h1><p>${sub}</p></div>${actions?`<div class="actions"><select class="date-select" aria-label="Reporting period" onchange="period=Number(this.value);renderContent()">${[30,60,90,180,365].map(n=>`<option value="${n}" ${period===n?'selected':''}>▣ Last ${n} days</option>`).join('')}</select><button onclick="exportReport('summary')">⇩ &nbsp; Export report</button></div>`:''}</div>`}
