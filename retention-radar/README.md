@@ -1,7 +1,3 @@
-# Retention Radar — v2
-
-Read [TRANSFORMATION.md](TRANSFORMATION.md) for the current architecture, model, acceptance audit, and outstanding requirements. The original setup guide follows; v2 supersedes its model description.
-
 # Retention Radar
 
 A working synthetic retention intelligence demo for Man Matters. All 5,000 customers, 11,081 orders, support interactions, and engagement events are fictional. No real communications are sent.
@@ -39,23 +35,48 @@ python -m backend.seed
 python -m uvicorn backend.api:app --host 127.0.0.1 --port 8000
 ```
 
-Use the same database password in `DATABASE_URL`, URL-encoded if it contains special characters. Set your own secrets; the examples are placeholders. Keep credentials out of Git and files delivered to others. Seed is idempotent and will not replace an existing database.
+Use the same database password in `DATABASE_URL`, URL-encoded if it contains special characters. Set your own secrets; the examples are placeholders. Keep credentials out of Git and files delivered to others. Re-running the seed on matching demo histories installs the current model’s dated scores and preserves recorded interventions.
 
 Open http://127.0.0.1:8000 and sign in with `manager@radar.demo`, `analyst@radar.demo`, or `success@radar.demo` and the password you set in `DEMO_PASSWORD`. Analysts cannot write interventions or campaigns. API documentation is at `/docs`. Tokens expire after four hours. For a real deployment, add managed identity, login rate limiting, HTTPS, tenancy controls, audit retention, database migrations, monitoring, and a customer-data governance policy.
 
-## Reproduce the ML pipeline
+## Refill-risk prediction
+
+The model estimates the chance that an active purchaser’s refill coverage lapses within 30 days. Each completed purchase establishes coverage for its product cycle plus 14 days. A later purchase can extend coverage. A lapse counts even when the customer returns later in the window.
+
+In the 1 November 2026 synthetic snapshot, 876 active purchasers have coverage that can expire within the horizon. Another 925 have enough coverage to receive a probability of zero by definition. The remaining 3,199 customers are already inactive or have no completed purchase and receive an eligibility reason.
+
+**Evaluation.** The October 1 release test contains 359 distinct customers and 119 observed lapses. Training, selection, calibration, operating-threshold selection and release evaluation use disjoint customer groups and chronological windows. Both models use the same held-out customers and outcomes.
+
+| Held-out measure | Previous model | Current model |
+| --- | ---: | ---: |
+| Average precision | 0.783 | 0.834 |
+| Brier loss, lower is better | 0.128 | 0.100 |
+| Lapses among the highest-risk 72 customers | 55 | 60 |
+| Precision among those 72 | 76.4% | 83.3% |
+| Brier loss among the 177 whose coverage could expire | 0.243 | 0.203 |
+
+The selected model uses logistic regression with refill-history features and separately calibrated probabilities. The 95% paired bootstrap interval for the change in Brier loss is −0.046 to −0.010. For average precision the interval is −0.003 to +0.105. The test covers one date and uses simulated transactions. Real-world performance requires validation against mature customer outcomes. Measuring the impact of outreach requires a separate intervention study.
+
+**Using the scores.** Churn Intelligence ranks eligible customers for review. Model Intelligence shows model comparisons, held-out contact-capacity results and calibration. The classification threshold optimizes F1 on a separate cohort. Queue precision depends on the number of customers a team can review. Feature explanations measure the change in score when one feature takes its training median.
+
+**Training and serving.** Install the pinned dependencies and run from the application directory.
 
 ```powershell
-python backend/generate.py
+python -m backend.train_v3
+python -m backend.train_v3 --promote
 ```
 
-The deterministic seed is 42. Logistic Regression is compared against Random Forest; validation PR-AUC selects the model and validation F1 selects the intervention evaluation threshold. Test data is not used for selection. Chronological splits and disjoint customer groups prevent repeated-customer overlap; labels mature before the next split. Features use events strictly before their prediction snapshot. Missing numeric values are median-imputed inside the fitted pipeline.
+The first command records a candidate run. The second requests promotion under the release checks. Each run stores its model and report in `backend/runs/`. The active workspace export and scores are in `dist/data.json`. FastAPI loads the matching versioned artifact. The public static app serves scores computed for its displayed snapshot. The report records the dataset fingerprint, feature schema, evaluation dates and artifact digest.
 
-Target: no completed repeat purchase by the 30-day horizon, among customers whose product-specific expected replenishment plus 14-day grace falls within that horizon. These estimates include already-overdue customers, rather than estimating incident churn alone. Scoring customers outside refill eligibility is extrapolation and should be treated cautiously. Customers with no completed orders are unscored. Six product cycles vary from 30 to 60 days.
+**Monitoring later outcomes.** Archive the published workspace JSON when the scores are issued. Once the complete outcome window has been observed, evaluate that fixed cohort against a later export containing its full transaction history.
 
-Optional retraining: `python backend/generate.py --horizon 60 --grace 21` (horizons 30, 60, 90 are supported). Alternative horizons use earlier, non-overlapping snapshots so every label matures. Regenerate the matching database in a fresh environment when changing model definitions; the seed intentionally does not overwrite existing records. The delivered frontend copy is configured for the default 30-day/14-day model; model metadata and metrics update after a training run, but fixed explanatory labels need updating if publishing a different horizon.
+```powershell
+python -m backend.outcomes --predictions frozen-workspace.json --observations later-workspace.json
+```
 
-Explanations use one-feature replacement sensitivity against training medians, not SHAP. Correlated features can share attribution. No explanation is a causal claim. Model calibration tables and Brier loss expose probability reliability; scores have not been calibrated on real data. Synthetic model performance does not imply production performance.
+The audit checks customer identity, product cycles and historical purchase continuity. It reports observed versus expected lapses, Brier loss and top-20% queue precision. For the 1 November snapshot, the first complete exclusive observation date is 2 December 2026. Until then, the result is `awaiting_maturity`. Log any outreach that could have changed subsequent purchases when interpreting results.
+
+[Historical development notes](TRANSFORMATION.md) describe the earlier models. The active run’s `report.json` gives the current definitions and metrics.
 
 ## Analytical definitions and limits
 
@@ -64,7 +85,7 @@ Explanations use one-feature replacement sensitivity against training medians, n
 - Customer value is historical completed-order revenue, not predicted lifetime value.
 - Revenue at risk is historical value weighted by probability for high/critical risk customers, not a forecast of revenue loss.
 - Repeat-order revenue is descriptive. It is not claimed to be saved or retained by an intervention.
-- The current model risk and exposure card comparisons use historical observed overdue proxies. These differences are disclosed in the metric tooltips and dashboard note and should not be interpreted as like-for-like model movement.
+- Historical model comparisons use the same held-out customers and prediction date.
 - Cohorts begin at first completed purchase; each cell measures purchasing within a subsequent calendar month. Unfinished months are blank, never zero-filled.
 - Product tables use customers acquired during the chosen period and their observed orders; channel filters apply. Customer-list period controls select the summary export window, while record filters govern the customer export.
 - Support statuses in generated histories are fixed synthetic snapshots. Production training needs timestamped ticket-status changes.

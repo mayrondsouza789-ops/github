@@ -7,5 +7,7 @@ backend/model.pkl
 *.tar.gz
 
 .vercel/
+backend/.promotion.lock
+backend/.candidate-*/
 .env.*
 !.env.example

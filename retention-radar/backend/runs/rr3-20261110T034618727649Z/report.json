@@ -1,0 +1,1498 @@
+{
+  "schema_version": 3,
+  "version": "rr3-20261110T034618727649Z",
+  "selected": "Refill logistic regression",
+  "trained": "2026-11-10T03:46:18.727649+00:00",
+  "dataset_version": "1fbce2a6f9b3607cc7e4ad0df02970e8f1e991ae14dc97768f75ecce909c018d",
+  "horizon": 30,
+  "grace": 14,
+  "threshold": 0.6,
+  "features": [
+    "coverage_days",
+    "last_cycle_days",
+    "recency_ratio",
+    "order_count",
+    "last_gap_ratio",
+    "mean_gap_ratio",
+    "late_refill_share",
+    "failed_since_purchase",
+    "failed_order_fraction",
+    "purchases_90d",
+    "tenure_cycles"
+  ],
+  "feature_info": {
+    "coverage_days": {
+      "label": "Remaining refill coverage",
+      "unit": "days"
+    },
+    "last_cycle_days": {
+      "label": "Last purchased product's refill cycle",
+      "unit": "days"
+    },
+    "recency_ratio": {
+      "label": "Elapsed time since purchase / refill cycle",
+      "unit": "cycles"
+    },
+    "order_count": {
+      "label": "Completed purchases",
+      "unit": "orders"
+    },
+    "last_gap_ratio": {
+      "label": "Last refill interval / preceding product cycle",
+      "unit": "cycles"
+    },
+    "mean_gap_ratio": {
+      "label": "Mean refill interval / preceding product cycle",
+      "unit": "cycles"
+    },
+    "late_refill_share": {
+      "label": "Past refill gaps exceeding coverage",
+      "unit": "fraction"
+    },
+    "failed_since_purchase": {
+      "label": "Cancelled or refunded attempts since last purchase",
+      "unit": "orders"
+    },
+    "failed_order_fraction": {
+      "label": "Cancelled or refunded share of recorded orders",
+      "unit": "fraction"
+    },
+    "purchases_90d": {
+      "label": "Completed purchases in the preceding 90 days",
+      "unit": "orders"
+    },
+    "tenure_cycles": {
+      "label": "Time since first purchase / latest refill cycle",
+      "unit": "cycles"
+    }
+  },
+  "metrics": {
+    "Refill logistic regression": {
+      "population": 359,
+      "positives": 119,
+      "prevalence": 0.33147632311977715,
+      "threshold": 0.6,
+      "accuracy": 0.8356545961002786,
+      "brier": 0.10003939773955138,
+      "pr_auc": 0.833504699198525,
+      "roc_auc": 0.92921918767507,
+      "precision": 0.689873417721519,
+      "recall": 0.9159663865546218,
+      "f1": 0.7870036101083032,
+      "confusion": [
+        [
+          191,
+          49
+        ],
+        [
+          10,
+          109
+        ]
+      ],
+      "calibration": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.4690350047227212,
+          0.5
+        ],
+        [
+          0.5608442495452169,
+          0.5294117647058824
+        ],
+        [
+          0.6557992880255857,
+          0.45652173913043476
+        ],
+        [
+          0.756416843072968,
+          0.7164179104477612
+        ],
+        [
+          0.8391475251412293,
+          0.8611111111111112
+        ],
+        [
+          0.9571910177593482,
+          1.0
+        ]
+      ],
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 182,
+          "predicted": 0.0,
+          "observed": 0.0
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 2,
+          "predicted": 0.4690350047227212,
+          "observed": 0.5
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 17,
+          "predicted": 0.5608442495452169,
+          "observed": 0.5294117647058824
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 46,
+          "predicted": 0.6557992880255857,
+          "observed": 0.45652173913043476
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 67,
+          "predicted": 0.756416843072968,
+          "observed": 0.7164179104477612
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 36,
+          "predicted": 0.8391475251412293,
+          "observed": 0.8611111111111112
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 9,
+          "predicted": 0.9571910177593482,
+          "observed": 1.0
+        }
+      ],
+      "lift": 2.5140056022408968,
+      "capacity": 72,
+      "precision_at_k": 0.8333333333333334,
+      "recall_at_k": 0.5042016806722689
+    }
+  },
+  "validation": {
+    "Refill logistic regression": 0.8480007436703396,
+    "Refill gradient boosting": 0.8467320686964501,
+    "Refill histogram boosting": 0.8372024029488818
+  },
+  "evaluation": {
+    "test_date": "2026-10-01",
+    "prevalence": 0.33147632311977715,
+    "incumbent": {
+      "population": 359,
+      "positives": 119,
+      "prevalence": 0.33147632311977715,
+      "threshold": 0.5,
+      "accuracy": 0.7994428969359332,
+      "brier": 0.1278414284323919,
+      "pr_auc": 0.7826435189466915,
+      "roc_auc": 0.8982142857142856,
+      "precision": 0.7373737373737373,
+      "recall": 0.6134453781512605,
+      "f1": 0.6697247706422018,
+      "confusion": [
+        [
+          214,
+          26
+        ],
+        [
+          46,
+          73
+        ]
+      ],
+      "calibration": [
+        [
+          0.08016528810750638,
+          0.008333333333333333
+        ],
+        [
+          0.13740032576544356,
+          0.08771929824561403
+        ],
+        [
+          0.2519606860012927,
+          0.3142857142857143
+        ],
+        [
+          0.35700506472634896,
+          0.5454545454545454
+        ],
+        [
+          0.4528603076722958,
+          0.6538461538461539
+        ],
+        [
+          0.5285342961031153,
+          0.6428571428571429
+        ],
+        [
+          0.654797690892592,
+          0.6666666666666666
+        ],
+        [
+          0.7556344252557826,
+          0.6739130434782609
+        ],
+        [
+          0.8169169430328723,
+          0.9583333333333334
+        ]
+      ],
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 120,
+          "predicted": 0.08016528810750638,
+          "observed": 0.008333333333333333
+        },
+        {
+          "lower": 0.1,
+          "upper": 0.2,
+          "count": 57,
+          "predicted": 0.13740032576544356,
+          "observed": 0.08771929824561403
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.3,
+          "count": 35,
+          "predicted": 0.2519606860012927,
+          "observed": 0.3142857142857143
+        },
+        {
+          "lower": 0.3,
+          "upper": 0.4,
+          "count": 22,
+          "predicted": 0.35700506472634896,
+          "observed": 0.5454545454545454
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 26,
+          "predicted": 0.4528603076722958,
+          "observed": 0.6538461538461539
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 14,
+          "predicted": 0.5285342961031153,
+          "observed": 0.6428571428571429
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 15,
+          "predicted": 0.654797690892592,
+          "observed": 0.6666666666666666
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 46,
+          "predicted": 0.7556344252557826,
+          "observed": 0.6739130434782609
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 24,
+          "predicted": 0.8169169430328723,
+          "observed": 0.9583333333333334
+        }
+      ],
+      "lift": 2.304505135387488,
+      "capacity": 72,
+      "precision_at_k": 0.7638888888888888,
+      "recall_at_k": 0.46218487394957986
+    },
+    "incumbent_version": "rr2-20261101T165216Z",
+    "baseline": {
+      "population": 359,
+      "positives": 119,
+      "prevalence": 0.33147632311977715,
+      "threshold": 0.5700000000000001,
+      "accuracy": 0.8384401114206128,
+      "brier": 0.10093476584447933,
+      "pr_auc": 0.7812989556824399,
+      "roc_auc": 0.9158088235294117,
+      "precision": 0.672316384180791,
+      "recall": 1.0,
+      "f1": 0.8040540540540541,
+      "confusion": [
+        [
+          182,
+          58
+        ],
+        [
+          0,
+          119
+        ]
+      ],
+      "calibration": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.5758699786783986,
+          0.55
+        ],
+        [
+          0.6311463264332134,
+          0.6530612244897959
+        ],
+        [
+          0.7334437765707236,
+          0.65625
+        ],
+        [
+          0.8708512173921675,
+          0.9166666666666666
+        ]
+      ],
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 182,
+          "predicted": 0.0,
+          "observed": 0.0
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 60,
+          "predicted": 0.5758699786783986,
+          "observed": 0.55
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 49,
+          "predicted": 0.6311463264332134,
+          "observed": 0.6530612244897959
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 32,
+          "predicted": 0.7334437765707236,
+          "observed": 0.65625
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 36,
+          "predicted": 0.8708512173921675,
+          "observed": 0.9166666666666666
+        }
+      ],
+      "lift": 2.4302054154995334,
+      "capacity": 72,
+      "precision_at_k": 0.8055555555555556,
+      "recall_at_k": 0.48739495798319327
+    },
+    "baseline_name": "Historical rate by week of remaining coverage",
+    "capacity": [
+      {
+        "fraction": 0.05,
+        "count": 18,
+        "hits": 16,
+        "precision": 0.8888888888888888,
+        "recall": 0.13445378151260504,
+        "lift": 2.6816059757236226,
+        "precision_ci95": [
+          0.6719975513339578,
+          0.9689811315464172
+        ]
+      },
+      {
+        "fraction": 0.1,
+        "count": 36,
+        "hits": 31,
+        "precision": 0.8611111111111112,
+        "recall": 0.2605042016806723,
+        "lift": 2.5978057889822597,
+        "precision_ci95": [
+          0.7134014871960681,
+          0.9391827463688489
+        ]
+      },
+      {
+        "fraction": 0.2,
+        "count": 72,
+        "hits": 60,
+        "precision": 0.8333333333333334,
+        "recall": 0.5042016806722689,
+        "lift": 2.5140056022408968,
+        "precision_ci95": [
+          0.730890790978952,
+          0.9020072491467838
+        ]
+      }
+    ],
+    "confidence": {
+      "pr_auc": [
+        0.7607557337866802,
+        0.8986161607113563
+      ],
+      "brier": [
+        0.08211523233760239,
+        0.11928542151644148
+      ],
+      "pr_auc_delta_vs_incumbent": [
+        -0.002697796699090332,
+        0.10475339376519711
+      ],
+      "brier_delta_vs_incumbent": [
+        -0.04637819015285185,
+        -0.01024507307621674
+      ]
+    },
+    "splits": [
+      {
+        "name": "Training",
+        "start": "2025-12-06",
+        "end": "2026-05-02",
+        "rows": 9298,
+        "customers": 976,
+        "positives": 2794,
+        "matured_through": "2026-06-01"
+      },
+      {
+        "name": "Selection",
+        "start": "2026-06-02",
+        "end": "2026-06-16",
+        "rows": 890,
+        "customers": 340,
+        "positives": 304,
+        "matured_through": "2026-07-16"
+      },
+      {
+        "name": "Calibration",
+        "start": "2026-07-17",
+        "end": "2026-07-31",
+        "rows": 510,
+        "customers": 193,
+        "positives": 172,
+        "matured_through": "2026-08-30"
+      },
+      {
+        "name": "Operating threshold",
+        "start": "2026-08-31",
+        "end": "2026-08-31",
+        "rows": 173,
+        "customers": 173,
+        "positives": 61,
+        "matured_through": "2026-09-30"
+      },
+      {
+        "name": "Release test",
+        "start": "2026-10-01",
+        "end": "2026-10-01",
+        "rows": 359,
+        "customers": 359,
+        "positives": 119,
+        "matured_through": "2026-10-31"
+      }
+    ],
+    "threshold_policy": "Maximum F1 on the separate operating-threshold cohort. Ties prefer higher precision via the higher threshold. Outreach lists use ranked capacity.",
+    "gate": {
+      "pr_auc_vs_incumbent": true,
+      "brier_vs_incumbent": true,
+      "pr_auc_vs_coverage_baseline": true,
+      "brier_vs_coverage_baseline": true
+    },
+    "actionable": {
+      "current": {
+        "population": 177,
+        "positives": 119,
+        "prevalence": 0.672316384180791,
+        "threshold": 0.6,
+        "accuracy": 0.6666666666666666,
+        "brier": 0.20290476716666073,
+        "pr_auc": 0.8335046991985249,
+        "roc_auc": 0.7071138800347725,
+        "precision": 0.689873417721519,
+        "recall": 0.9159663865546218,
+        "f1": 0.7870036101083032,
+        "confusion": [
+          [
+            9,
+            49
+          ],
+          [
+            10,
+            109
+          ]
+        ],
+        "calibration": [
+          [
+            0.4690350047227212,
+            0.5
+          ],
+          [
+            0.5608442495452169,
+            0.5294117647058824
+          ],
+          [
+            0.6557992880255857,
+            0.45652173913043476
+          ],
+          [
+            0.756416843072968,
+            0.7164179104477612
+          ],
+          [
+            0.8391475251412293,
+            0.8611111111111112
+          ],
+          [
+            0.9571910177593482,
+            1.0
+          ]
+        ],
+        "calibration_bins": [
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "count": 2,
+            "predicted": 0.4690350047227212,
+            "observed": 0.5
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6,
+            "count": 17,
+            "predicted": 0.5608442495452169,
+            "observed": 0.5294117647058824
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.7,
+            "count": 46,
+            "predicted": 0.6557992880255857,
+            "observed": 0.45652173913043476
+          },
+          {
+            "lower": 0.7,
+            "upper": 0.8,
+            "count": 67,
+            "predicted": 0.756416843072968,
+            "observed": 0.7164179104477612
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "count": 36,
+            "predicted": 0.8391475251412293,
+            "observed": 0.8611111111111112
+          },
+          {
+            "lower": 0.9,
+            "upper": 1.0,
+            "count": 9,
+            "predicted": 0.9571910177593482,
+            "observed": 1.0
+          }
+        ],
+        "lift": 1.280812324929972,
+        "capacity": 36,
+        "precision_at_k": 0.8611111111111112,
+        "recall_at_k": 0.2605042016806723
+      },
+      "incumbent": {
+        "population": 177,
+        "positives": 119,
+        "prevalence": 0.672316384180791,
+        "threshold": 0.5,
+        "accuracy": 0.5932203389830508,
+        "brier": 0.2434433112050678,
+        "pr_auc": 0.7926904920733865,
+        "roc_auc": 0.6298174442190669,
+        "precision": 0.7373737373737373,
+        "recall": 0.6134453781512605,
+        "f1": 0.6697247706422018,
+        "confusion": [
+          [
+            32,
+            26
+          ],
+          [
+            46,
+            73
+          ]
+        ],
+        "calibration": [
+          [
+            0.08890841440745484,
+            0.5
+          ],
+          [
+            0.15196520883622008,
+            0.5
+          ],
+          [
+            0.24841872308669893,
+            0.5789473684210527
+          ],
+          [
+            0.3587392638970252,
+            0.5714285714285714
+          ],
+          [
+            0.4528603076722958,
+            0.6538461538461539
+          ],
+          [
+            0.5285342961031153,
+            0.6428571428571429
+          ],
+          [
+            0.654797690892592,
+            0.6666666666666666
+          ],
+          [
+            0.7556344252557826,
+            0.6739130434782609
+          ],
+          [
+            0.8169169430328723,
+            0.9583333333333334
+          ]
+        ],
+        "calibration_bins": [
+          {
+            "lower": 0.0,
+            "upper": 0.1,
+            "count": 2,
+            "predicted": 0.08890841440745484,
+            "observed": 0.5
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "count": 10,
+            "predicted": 0.15196520883622008,
+            "observed": 0.5
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.3,
+            "count": 19,
+            "predicted": 0.24841872308669893,
+            "observed": 0.5789473684210527
+          },
+          {
+            "lower": 0.3,
+            "upper": 0.4,
+            "count": 21,
+            "predicted": 0.3587392638970252,
+            "observed": 0.5714285714285714
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "count": 26,
+            "predicted": 0.4528603076722958,
+            "observed": 0.6538461538461539
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6,
+            "count": 14,
+            "predicted": 0.5285342961031153,
+            "observed": 0.6428571428571429
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.7,
+            "count": 15,
+            "predicted": 0.654797690892592,
+            "observed": 0.6666666666666666
+          },
+          {
+            "lower": 0.7,
+            "upper": 0.8,
+            "count": 46,
+            "predicted": 0.7556344252557826,
+            "observed": 0.6739130434782609
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "count": 24,
+            "predicted": 0.8169169430328723,
+            "observed": 0.9583333333333334
+          }
+        ],
+        "lift": 1.2394957983193278,
+        "capacity": 36,
+        "precision_at_k": 0.8333333333333334,
+        "recall_at_k": 0.25210084033613445
+      },
+      "baseline": {
+        "population": 177,
+        "positives": 119,
+        "prevalence": 0.672316384180791,
+        "threshold": 0.5700000000000001,
+        "accuracy": 0.672316384180791,
+        "brier": 0.20472079626083664,
+        "pr_auc": 0.7812989556824399,
+        "roc_auc": 0.6516227180527383,
+        "precision": 0.672316384180791,
+        "recall": 1.0,
+        "f1": 0.8040540540540541,
+        "confusion": [
+          [
+            0,
+            58
+          ],
+          [
+            0,
+            119
+          ]
+        ],
+        "calibration": [
+          [
+            0.5758699786783986,
+            0.55
+          ],
+          [
+            0.6311463264332134,
+            0.6530612244897959
+          ],
+          [
+            0.7334437765707236,
+            0.65625
+          ],
+          [
+            0.8708512173921675,
+            0.9166666666666666
+          ]
+        ],
+        "calibration_bins": [
+          {
+            "lower": 0.5,
+            "upper": 0.6,
+            "count": 60,
+            "predicted": 0.5758699786783986,
+            "observed": 0.55
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.7,
+            "count": 49,
+            "predicted": 0.6311463264332134,
+            "observed": 0.6530612244897959
+          },
+          {
+            "lower": 0.7,
+            "upper": 0.8,
+            "count": 32,
+            "predicted": 0.7334437765707236,
+            "observed": 0.65625
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "count": 36,
+            "predicted": 0.8708512173921675,
+            "observed": 0.9166666666666666
+          }
+        ],
+        "lift": 1.3634453781512603,
+        "capacity": 36,
+        "precision_at_k": 0.9166666666666666,
+        "recall_at_k": 0.2773109243697479
+      },
+      "confidence": {
+        "pr_auc": [
+          0.7658039478264494,
+          0.8990342239730811
+        ],
+        "brier": [
+          0.17601368203647574,
+          0.23364717083586575
+        ],
+        "pr_auc_delta_vs_incumbent": [
+          -0.01001679049259561,
+          0.09570759140484499
+        ],
+        "brier_delta_vs_incumbent": [
+          -0.07530189013851171,
+          -0.009260384263906544
+        ]
+      }
+    },
+    "capacity_ties": "Stable source customer order",
+    "bootstrap_draws": 700
+  },
+  "splitDates": [
+    "2026-05-02",
+    "2026-06-16",
+    "2026-07-31",
+    "2026-08-31",
+    "2026-10-01"
+  ],
+  "splitCounts": [
+    9298,
+    890,
+    510,
+    173,
+    359
+  ],
+  "target": "First refill-coverage lapse within 30 days among active purchasers, using the last completed product\u2019s cycle plus 14 days of grace.",
+  "explanation": "Each effect is the score difference when one feature is replaced by its training median. Related refill features can share information. These are model sensitivities.",
+  "unavailable": [
+    "Real customer outcomes",
+    "Intervention lift",
+    "SKU and pack size",
+    "Concurrent treatment coverage",
+    "Subscription status"
+  ],
+  "accepted": true,
+  "quality": {
+    "issues": [],
+    "orders": 11081,
+    "customers": 5000
+  },
+  "sklearn_version": "1.9.0",
+  "subgroups": [
+    {
+      "product": "Minoxidil",
+      "population": 52,
+      "positives": 21,
+      "prevalence": 0.40384615384615385,
+      "threshold": 0.6,
+      "accuracy": 0.8076923076923077,
+      "brier": 0.11368909134150836,
+      "pr_auc": 0.9091904869541978,
+      "roc_auc": 0.9285714285714286,
+      "precision": 0.7619047619047619,
+      "recall": 0.7619047619047619,
+      "f1": 0.7619047619047619,
+      "confusion": [
+        [
+          26,
+          5
+        ],
+        [
+          5,
+          16
+        ]
+      ],
+      "calibration": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.5549916724682677,
+          0.45454545454545453
+        ],
+        [
+          0.6575227630413233,
+          0.4444444444444444
+        ],
+        [
+          0.7405614082990636,
+          1.0
+        ],
+        [
+          0.8157797633991,
+          1.0
+        ],
+        [
+          0.9913937630726377,
+          1.0
+        ]
+      ],
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 20,
+          "predicted": 0.0,
+          "observed": 0.0
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 11,
+          "predicted": 0.5549916724682677,
+          "observed": 0.45454545454545453
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 9,
+          "predicted": 0.6575227630413233,
+          "observed": 0.4444444444444444
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 6,
+          "predicted": 0.7405614082990636,
+          "observed": 1.0
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 4,
+          "predicted": 0.8157797633991,
+          "observed": 1.0
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 2,
+          "predicted": 0.9913937630726377,
+          "observed": 1.0
+        }
+      ],
+      "lift": 2.4761904761904763,
+      "capacity": 11,
+      "precision_at_k": 1.0,
+      "recall_at_k": 0.5238095238095238
+    },
+    {
+      "product": "Hair gummies",
+      "population": 45,
+      "positives": 18,
+      "prevalence": 0.4,
+      "threshold": 0.6,
+      "accuracy": 0.7333333333333333,
+      "brier": 0.15238950674423274,
+      "pr_auc": 0.8193997175892259,
+      "roc_auc": 0.8600823045267489,
+      "precision": 0.625,
+      "recall": 0.8333333333333334,
+      "f1": 0.7142857142857143,
+      "confusion": [
+        [
+          18,
+          9
+        ],
+        [
+          3,
+          15
+        ]
+      ],
+      "calibration": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.4690350047227212,
+          0.5
+        ],
+        [
+          0.5717672518496262,
+          0.5
+        ],
+        [
+          0.6456619645125216,
+          0.4444444444444444
+        ],
+        [
+          0.7695988671036792,
+          0.6
+        ],
+        [
+          0.80870970478099,
+          1.0
+        ],
+        [
+          0.9930029843176228,
+          1.0
+        ]
+      ],
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 15,
+          "predicted": 0.0,
+          "observed": 0.0
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.5,
+          "count": 2,
+          "predicted": 0.4690350047227212,
+          "observed": 0.5
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 4,
+          "predicted": 0.5717672518496262,
+          "observed": 0.5
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 9,
+          "predicted": 0.6456619645125216,
+          "observed": 0.4444444444444444
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 10,
+          "predicted": 0.7695988671036792,
+          "observed": 0.6
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 3,
+          "predicted": 0.80870970478099,
+          "observed": 1.0
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 2,
+          "predicted": 0.9930029843176228,
+          "observed": 1.0
+        }
+      ],
+      "lift": 2.222222222222222,
+      "capacity": 9,
+      "precision_at_k": 0.8888888888888888,
+      "recall_at_k": 0.4444444444444444
+    },
+    {
+      "product": "DHT shampoo",
+      "population": 57,
+      "positives": 17,
+      "prevalence": 0.2982456140350877,
+      "threshold": 0.6,
+      "accuracy": 0.8947368421052632,
+      "brier": 0.0709447074841023,
+      "pr_auc": 0.8298299810448149,
+      "roc_auc": 0.9463235294117647,
+      "precision": 0.7391304347826086,
+      "recall": 1.0,
+      "f1": 0.85,
+      "confusion": [
+        [
+          34,
+          6
+        ],
+        [
+          0,
+          17
+        ]
+      ],
+      "calibration": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.6423535724381048,
+          0.42857142857142855
+        ],
+        [
+          0.7787949139929118,
+          1.0
+        ],
+        [
+          0.8441224899438597,
+          0.75
+        ]
+      ],
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 34,
+          "predicted": 0.0,
+          "observed": 0.0
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 7,
+          "predicted": 0.6423535724381048,
+          "observed": 0.42857142857142855
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 8,
+          "predicted": 0.7787949139929118,
+          "observed": 1.0
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 8,
+          "predicted": 0.8441224899438597,
+          "observed": 0.75
+        }
+      ],
+      "lift": 2.794117647058824,
+      "capacity": 12,
+      "precision_at_k": 0.8333333333333334,
+      "recall_at_k": 0.5882352941176471
+    },
+    {
+      "product": "Haircare kit",
+      "population": 85,
+      "positives": 25,
+      "prevalence": 0.29411764705882354,
+      "threshold": 0.6,
+      "accuracy": 0.9529411764705882,
+      "brier": 0.04125654033397832,
+      "pr_auc": 0.9260475128092831,
+      "roc_auc": 0.9766666666666667,
+      "precision": 0.8620689655172413,
+      "recall": 1.0,
+      "f1": 0.9259259259259259,
+      "confusion": [
+        [
+          56,
+          4
+        ],
+        [
+          0,
+          25
+        ]
+      ],
+      "calibration": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.6716531494286611,
+          1.0
+        ],
+        [
+          0.7533041986567571,
+          0.7272727272727273
+        ],
+        [
+          0.8489989189625156,
+          0.9
+        ],
+        [
+          0.9124714390214016,
+          1.0
+        ]
+      ],
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 56,
+          "predicted": 0.0,
+          "observed": 0.0
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 4,
+          "predicted": 0.6716531494286611,
+          "observed": 1.0
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 11,
+          "predicted": 0.7533041986567571,
+          "observed": 0.7272727272727273
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 10,
+          "predicted": 0.8489989189625156,
+          "observed": 0.9
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 4,
+          "predicted": 0.9124714390214016,
+          "observed": 1.0
+        }
+      ],
+      "lift": 3.1999999999999997,
+      "capacity": 17,
+      "precision_at_k": 0.9411764705882353,
+      "recall_at_k": 0.64
+    },
+    {
+      "product": "Scalp treatment",
+      "population": 54,
+      "positives": 15,
+      "prevalence": 0.2777777777777778,
+      "threshold": 0.6,
+      "accuracy": 0.7222222222222222,
+      "brier": 0.15160826056202856,
+      "pr_auc": 0.7978517487288102,
+      "roc_auc": 0.894017094017094,
+      "precision": 0.5,
+      "recall": 0.9333333333333333,
+      "f1": 0.6511627906976745,
+      "confusion": [
+        [
+          25,
+          14
+        ],
+        [
+          1,
+          14
+        ]
+      ],
+      "calibration": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.5737552718490309,
+          1.0
+        ],
+        [
+          0.6665430097332006,
+          0.375
+        ],
+        [
+          0.7548581370224964,
+          0.4
+        ],
+        [
+          0.8447904832674705,
+          1.0
+        ]
+      ],
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 25,
+          "predicted": 0.0,
+          "observed": 0.0
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 1,
+          "predicted": 0.5737552718490309,
+          "observed": 1.0
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 8,
+          "predicted": 0.6665430097332006,
+          "observed": 0.375
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 15,
+          "predicted": 0.7548581370224964,
+          "observed": 0.4
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 5,
+          "predicted": 0.8447904832674705,
+          "observed": 1.0
+        }
+      ],
+      "lift": 2.618181818181818,
+      "capacity": 11,
+      "precision_at_k": 0.7272727272727273,
+      "recall_at_k": 0.5333333333333333
+    },
+    {
+      "product": "Hair serum",
+      "population": 66,
+      "positives": 23,
+      "prevalence": 0.3484848484848485,
+      "threshold": 0.6,
+      "accuracy": 0.8181818181818182,
+      "brier": 0.11223155924118958,
+      "pr_auc": 0.742312012955847,
+      "roc_auc": 0.8963599595551062,
+      "precision": 0.6666666666666666,
+      "recall": 0.9565217391304348,
+      "f1": 0.7857142857142857,
+      "confusion": [
+        [
+          32,
+          11
+        ],
+        [
+          1,
+          22
+        ]
+      ],
+      "calibration": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.5686195658702091,
+          1.0
+        ],
+        [
+          0.6580747798383735,
+          0.3333333333333333
+        ],
+        [
+          0.74711728309133,
+          0.8235294117647058
+        ],
+        [
+          0.8421902019385827,
+          0.6666666666666666
+        ],
+        [
+          0.9960399089680083,
+          1.0
+        ]
+      ],
+      "calibration_bins": [
+        {
+          "lower": 0.0,
+          "upper": 0.1,
+          "count": 32,
+          "predicted": 0.0,
+          "observed": 0.0
+        },
+        {
+          "lower": 0.5,
+          "upper": 0.6,
+          "count": 1,
+          "predicted": 0.5686195658702091,
+          "observed": 1.0
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.7,
+          "count": 9,
+          "predicted": 0.6580747798383735,
+          "observed": 0.3333333333333333
+        },
+        {
+          "lower": 0.7,
+          "upper": 0.8,
+          "count": 17,
+          "predicted": 0.74711728309133,
+          "observed": 0.8235294117647058
+        },
+        {
+          "lower": 0.8,
+          "upper": 0.9,
+          "count": 6,
+          "predicted": 0.8421902019385827,
+          "observed": 0.6666666666666666
+        },
+        {
+          "lower": 0.9,
+          "upper": 1.0,
+          "count": 1,
+          "predicted": 0.9960399089680083,
+          "observed": 1.0
+        }
+      ],
+      "lift": 2.049689440993789,
+      "capacity": 14,
+      "precision_at_k": 0.7142857142857143,
+      "recall_at_k": 0.43478260869565216
+    }
+  ],
+  "scored": 1801,
+  "population_counts": {
+    "model": 876,
+    "covered_through_horizon": 925,
+    "already_inactive": 3009,
+    "no_purchase": 190
+  },
+  "monitoring": [
+    {
+      "feature": "coverage_days",
+      "missing_rate": 0.0,
+      "standardised_shift": 0.11661629838546274
+    },
+    {
+      "feature": "last_cycle_days",
+      "missing_rate": 0.0,
+      "standardised_shift": 0.08086695502693288
+    },
+    {
+      "feature": "recency_ratio",
+      "missing_rate": 0.0,
+      "standardised_shift": 0.14145520158242877
+    },
+    {
+      "feature": "order_count",
+      "missing_rate": 0.0,
+      "standardised_shift": 1.4679957745425054
+    },
+    {
+      "feature": "last_gap_ratio",
+      "missing_rate": 0.35202665186007775,
+      "standardised_shift": 0.3097188877162016
+    },
+    {
+      "feature": "mean_gap_ratio",
+      "missing_rate": 0.35202665186007775,
+      "standardised_shift": 0.30925670481384926
+    },
+    {
+      "feature": "late_refill_share",
+      "missing_rate": 0.35202665186007775,
+      "standardised_shift": 0.327427301502295
+    },
+    {
+      "feature": "failed_since_purchase",
+      "missing_rate": 0.0,
+      "standardised_shift": 0.01393690156106361
+    },
+    {
+      "feature": "failed_order_fraction",
+      "missing_rate": 0.0,
+      "standardised_shift": 0.20721976475813939
+    },
+    {
+      "feature": "purchases_90d",
+      "missing_rate": 0.0,
+      "standardised_shift": 0.28411722830629266
+    },
+    {
+      "feature": "tenure_cycles",
+      "missing_rate": 0.0,
+      "standardised_shift": 1.5725853448108922
+    }
+  ],
+  "forecast": {
+    "expected": 638.8708610642551,
+    "lower": 614.0,
+    "upper": 663.0,
+    "method": "95% interval over independent customer outcomes conditional on these scores. Shared shocks, parameter uncertainty and domain shift are outside the interval."
+  },
+  "artifact_sha256": "76829e4028ee3fef385c12ff040d9a739831fa4969e5b1998b256498954e4788"
+}

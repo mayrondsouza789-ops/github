@@ -1,15 +1,17 @@
 """PostgreSQL-backed FastAPI API. Run `python -m backend.seed` before serving."""
-import os, json, secrets, hashlib, hmac, pickle, csv, io
+import os, json, secrets, hashlib, hmac, csv, io
+from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone, date
 from pathlib import Path
 from typing import Literal
 import jwt
-import numpy as np
 from fastapi import FastAPI, Depends, HTTPException, Query, Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from sqlalchemy import create_engine, Column, Integer, String, Float, ForeignKey, Date, Text, Boolean, select, func
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
+from .prediction_store import install_predictions
+from .serving import InvalidFeatures, UnavailableRelease, published_snapshot, score_request
 
 DATABASE_URL=os.environ.get('DATABASE_URL','postgresql+psycopg://radar:radar@localhost:5432/radar')
 SECRET=os.environ.get('JWT_SECRET')
@@ -40,6 +42,10 @@ class Ticket(Base):
 class Prediction(Base):
  __tablename__='churn_predictions'
  id=Column(Integer,primary_key=True); customer_id=Column(ForeignKey('customers.id'),index=True); date=Column(Date); probability=Column(Float,nullable=True); risk=Column(String); details=Column(Text); model=Column(String)
+class PredictionRelease(Base):
+ __tablename__='prediction_releases'
+ model=Column(String,primary_key=True)
+ as_of=Column(Date,primary_key=True)
 class Segment(Base):
  __tablename__='customer_segments'
  id=Column(Integer,primary_key=True); customer_id=Column(ForeignKey('customers.id')); segment=Column(String)
@@ -53,7 +59,13 @@ class Campaign(Base):
  __tablename__='campaigns'
  id=Column(Integer,primary_key=True); name=Column(String); type=Column(String); risk=Column(String); simulated=Column(Boolean,default=True); results=Column(Text,default='{}')
 
-app=FastAPI(title='Retention Radar',description='Synthetic customer retention demo. Not actual Man Matters intelligence.',version='1.0.0')
+@asynccontextmanager
+async def lifespan(app):
+ # Existing seeded installations gain the publication marker without altering their tables.
+ PredictionRelease.__table__.create(engine,checkfirst=True)
+ yield
+
+app=FastAPI(title='Retention Radar',description='Synthetic customer retention and refill-risk forecasting.',version='3.0.0',lifespan=lifespan)
 auth=HTTPBearer()
 def db():
  with SessionLocal() as session: yield session
@@ -71,6 +83,19 @@ def editor(user:User=Depends(principal)):
  if user.role not in ['Retention Manager','Customer Success Executive']: raise HTTPException(403,'Role cannot modify interventions')
  return user
 def serialize(obj): return {col.name:getattr(obj,col.name) for col in obj.__table__.columns}
+
+def release_for(session):
+ data=published_snapshot()
+ try:
+  if install_predictions(session,data):session.commit()
+ except UnavailableRelease as error:
+  session.rollback()
+  raise HTTPException(503,str(error)) from error
+ return data
+
+def score_scope(data):
+ return (Prediction.model==data['model']['version'],Prediction.date==date.fromisoformat(data['asOf']))
+
 class Login(BaseModel): email:str=Field(max_length=200); password:str=Field(max_length=200)
 @app.post('/api/auth/login')
 def login(body:Login,session:Session=Depends(db)):
@@ -84,31 +109,34 @@ def health(): return {'status':'ok','synthetic':True}
 def config(): return Response('window.API_MODE=true;',media_type='application/javascript')
 @app.get('/api/workspace')
 def workspace(session:Session=Depends(db),user:User=Depends(principal)):
- metadata=json.loads((Path(__file__).parents[1]/'dist/data.json').read_text())
- predictions={p.customer_id:p for p in session.scalars(select(Prediction))}
+ metadata=release_for(session)
+ published={c['id']:c for c in metadata['customers']}
+ predictions={p.customer_id:p for p in session.scalars(select(Prediction).where(*score_scope(metadata)))}
  cs=[]
  for c in session.scalars(select(Customer).order_by(Customer.id)):
   p=predictions.get(c.id)
-  cs.append(dict(id=c.id,code=c.code,name=c.name,age=c.age,channel=c.channel,registered=str(c.registered),first=str(c.first),product=c.product_id,probability=p.probability if p else None,risk=p.risk if p else 'Unscored',contributions=json.loads(p.details) if p else []))
+  if p is None or c.id not in published:raise HTTPException(503,'Customer coverage differs from the released prediction snapshot.')
+  cs.append(dict(published[c.id],id=c.id,code=c.code,name=c.name,age=c.age,channel=c.channel,registered=str(c.registered),first=str(c.first),product=c.product_id,probability=p.probability,risk=p.risk,contributions=json.loads(p.details),model_version=p.model,prediction_timestamp=str(p.date)))
  items={i.order_id:i for i in session.scalars(select(OrderItem))}
- metadata.update(customers=cs,products=[serialize(p) for p in session.scalars(select(Product).order_by(Product.id))],orders=[dict(id=o.id,customer=o.customer_id,product=items[o.id].product_id,date=str(o.date),status=o.status,amount=o.amount) for o in session.scalars(select(Order).order_by(Order.date,Order.id))],tickets=[dict(id=t.id,customer=t.customer_id,date=str(t.date),status=t.status,subject=t.subject) for t in session.scalars(select(Ticket))],engagements=[dict(customer=e.customer_id,date=str(e.date),type=e.type) for e in session.scalars(select(Engagement))])
- return metadata
+ return dict(metadata,customers=cs,products=[serialize(p) for p in session.scalars(select(Product).order_by(Product.id))],orders=[dict(id=o.id,customer=o.customer_id,product=items[o.id].product_id,date=str(o.date),status=o.status,amount=o.amount) for o in session.scalars(select(Order).order_by(Order.date,Order.id))],tickets=[dict(id=t.id,customer=t.customer_id,date=str(t.date),status=t.status,subject=t.subject) for t in session.scalars(select(Ticket))],engagements=[dict(customer=e.customer_id,date=str(e.date),type=e.type) for e in session.scalars(select(Engagement))])
 @app.get('/api/me')
 def me(user:User=Depends(principal)):return {'email':user.email,'role':user.role}
 @app.get('/api/customers')
 def list_customers(q:str='',risk:str|None=None,product:int|None=None,channel:str|None=None,page:int=Query(1,ge=1),page_size:int=Query(25,ge=1,le=100),session:Session=Depends(db),user:User=Depends(principal)):
- stmt=select(Customer,Prediction).join(Prediction,Prediction.customer_id==Customer.id)
+ stmt=select(Customer,Prediction).join(Prediction,Prediction.customer_id==Customer.id).where(*score_scope(release_for(session)))
  if q: stmt=stmt.where((Customer.name.ilike('%'+q+'%'))|(Customer.code.ilike('%'+q+'%')))
  if risk: stmt=stmt.where(Prediction.risk==risk)
  if product is not None: stmt=stmt.where(Customer.product_id==product)
  if channel: stmt=stmt.where(Customer.channel==channel)
  total=session.scalar(select(func.count()).select_from(stmt.subquery()))
- return {'synthetic':True,'page':page,'total':total,'items':[dict(**serialize(c),prediction=serialize(p)) for c,p in session.execute(stmt.order_by(Prediction.probability.desc()).offset((page-1)*page_size).limit(page_size))]}
+ return {'synthetic':True,'page':page,'total':total,'items':[dict(**serialize(c),prediction=serialize(p)) for c,p in session.execute(stmt.order_by(Prediction.probability.desc().nullslast(),Customer.id).offset((page-1)*page_size).limit(page_size))]}
 @app.get('/api/customers/{cid}')
 def customer(cid:int,session:Session=Depends(db),user:User=Depends(principal)):
  c=session.get(Customer,cid)
  if c is None: raise HTTPException(404,'Customer not found')
- result=serialize(c)
+ release=release_for(session)
+ active=session.scalar(select(Prediction).where(Prediction.customer_id==cid,*score_scope(release)))
+ result=dict(serialize(c),current_prediction=serialize(active) if active else None)
  for name,cls in [('orders',Order),('engagement',Engagement),('support',Ticket),('predictions',Prediction),('interventions',Intervention),('segments',Segment)]: result[name]=[serialize(x) for x in session.scalars(select(cls).where(cls.customer_id==cid))]
  return result
 class InterventionBody(BaseModel):
@@ -145,7 +173,7 @@ def campaign_create(body:CampaignBody,session:Session=Depends(db),user:User=Depe
 def campaign_simulate(cid:int,session:Session=Depends(db),user:User=Depends(editor)):
  c=session.get(Campaign,cid)
  if c is None:raise HTTPException(404,'Campaign not found')
- cs=list(session.scalars(select(Customer).join(Prediction,Prediction.customer_id==Customer.id).where(Prediction.risk==c.risk)))
+ cs=list(session.scalars(select(Customer).join(Prediction,Prediction.customer_id==Customer.id).where(*score_scope(release_for(session)),Prediction.risk==c.risk)))
  contacted=[x for x in cs if x.id%10];delivered=[x for x in contacted if x.id%13];clicked=[x for x in delivered if x.id%4==0];converted=[x for x in clicked if x.id%3==0]
  prices={p.id:p.price for p in session.scalars(select(Product))}
  c.results=json.dumps(dict(targeted=len(cs),contacted=len(contacted),delivered=len(delivered),clicks=len(clicked),conversions=len(converted),revenue=sum(prices[x.product_id] for x in converted),cost=len(contacted)*.75));session.commit();return {'simulated':True,**json.loads(c.results)}
@@ -157,18 +185,21 @@ def update_intervention(iid:int,body:InterventionBody,session:Session=Depends(db
  if obj is None: raise HTTPException(404,'Intervention not found')
  return write_intervention(body,session,user,obj)
 @app.get('/api/model')
-def model(user:User=Depends(principal)):return json.loads((Path(__file__).parents[1]/'dist/data.json').read_text())['model']
+def model(user:User=Depends(principal)):return published_snapshot()['model']
 class FeatureBody(BaseModel):
- values:list[float]=Field(min_length=14,max_length=14)
+ """Named features use the published model; versioned vectors follow its feature order."""
+ values:list[float|None]|None=Field(default=None,min_length=1,max_length=128)
+ features:dict[str,float|None]|None=Field(default=None,max_length=128)
+ model_version:str|None=Field(default=None,max_length=100)
 @app.post('/api/predict')
 def predict(body:FeatureBody,user:User=Depends(editor)):
- if not all(np.isfinite(body.values)):raise HTTPException(422,'All feature values must be finite')
- with (Path(__file__).parent/'model.pkl').open('rb') as f: artifact=pickle.load(f)
- return {'synthetic':True,'probability':float(artifact['calibrator'].predict_proba(artifact['model'].predict_proba([body.values])[:,1,None])[0,1]),'horizon':artifact.get('horizon',30),'feature_order':artifact['features']}
+ try:return score_request(published_snapshot()['model'],body.values,body.features,body.model_version)
+ except InvalidFeatures as error:raise HTTPException(422,str(error)) from error
+ except UnavailableRelease as error:raise HTTPException(503,str(error)) from error
 @app.get('/api/reports/customers.csv')
 def report(session:Session=Depends(db),user:User=Depends(principal)):
  stream=io.StringIO();writer=csv.writer(stream);writer.writerow(['synthetic','id','name','probability','risk'])
- for c,p in session.execute(select(Customer,Prediction).join(Prediction,Prediction.customer_id==Customer.id)):
+ for c,p in session.execute(select(Customer,Prediction).join(Prediction,Prediction.customer_id==Customer.id).where(*score_scope(release_for(session)))):
   safe=c.name if not c.name.startswith(('=','+','-','@')) else "'"+c.name
   writer.writerow([True,c.code,safe,p.probability,p.risk])
  return Response(stream.getvalue(),media_type='text/csv',headers={'Content-Disposition':'attachment; filename=synthetic-customers.csv'})
@@ -189,7 +220,7 @@ def training_runs(user:User=Depends(principal)):
  return [json.loads(p.read_text()) for p in sorted((Path(__file__).parent/'runs').glob('*/report.json'),reverse=True)]
 def train_candidate():
  try:
-  result=subprocess.run([sys.executable,'-m','backend.train_v2'],cwd=Path(__file__).parents[1],capture_output=True,text=True,timeout=600)
+  result=subprocess.run([sys.executable,'-m','backend.train_v3'],cwd=Path(__file__).parents[1],capture_output=True,text=True,timeout=1800)
   logging.getLogger('retention-radar').info('Candidate training exit status %s',result.returncode)
  finally:training_lock.release()
 @app.post('/api/training/runs',status_code=202)
@@ -199,7 +230,6 @@ def start_training(background:BackgroundTasks,user:User=Depends(principal)):
  background.add_task(train_candidate)
  return {'status':'queued','promotion':'manual only; active model unchanged'}
 
-# Serve the same frontend through FastAPI. It remains browser-local unless adapted
-# to the authenticated API endpoints; no hosted role selector is treated as auth.
+# The same frontend switches to authenticated operations through /config.js.
 from fastapi.staticfiles import StaticFiles
 app.mount('/',StaticFiles(directory=Path(__file__).parents[1]/'dist',html=True),name='frontend')

@@ -1,13 +1,18 @@
-import os,json
+import os
 from datetime import date
-from pathlib import Path
 from sqlalchemy import select
-from .api import Base,engine,SessionLocal,User,Product,Customer,Order,OrderItem,Ticket,Engagement,Prediction,Segment,Intervention,Campaign,password_hash
+from .api import Base,engine,SessionLocal,User,Product,Customer,Order,OrderItem,Ticket,Engagement,Segment,Intervention,Campaign,password_hash
+from .prediction_store import install_predictions
+from .serving import published_snapshot
 def main():
  Base.metadata.create_all(engine)
- data=json.loads((Path(__file__).parents[1]/'dist/data.json').read_text())
+ data=published_snapshot()
  with SessionLocal() as s:
-  if s.scalar(select(Customer.id).limit(1)) is not None: print('Database already seeded; no records changed.');return
+  if s.scalar(select(Customer.id).limit(1)) is not None:
+   updated=install_predictions(s,data)
+   s.commit()
+   print('Installed released predictions.' if updated else 'Released predictions already installed.')
+   return
   password=os.environ.get('DEMO_PASSWORD')
   if not password or len(password)<12:raise RuntimeError('Set DEMO_PASSWORD to at least 12 characters')
   for i,role in enumerate(['Retention Manager','Business Analyst','Customer Success Executive']):s.add(User(email=['manager','analyst','success'][i]+'@radar.demo',password=password_hash(password),role=role))
@@ -20,10 +25,10 @@ def main():
   s.add_all([Ticket(id=t['id'],customer_id=t['customer'],date=date.fromisoformat(t['date']),status=t['status'],subject=t['subject']) for t in data['tickets']])
   s.add_all([Engagement(customer_id=e['customer'],date=date.fromisoformat(e['date']),type=e['type']) for e in data['engagements']])
   for c in data['customers']:
-   s.add(Prediction(customer_id=c['id'],date=date.fromisoformat(data['asOf']),probability=c['probability'],risk=c['risk'],details=json.dumps(c.get('contributions',[])),model=data['model']['selected']))
    s.add(Segment(customer_id=c['id'],segment='At-Risk' if c['risk'] in ['High','Critical'] else 'Active'))
   for c in sorted(data['customers'],key=lambda c:c['probability'] or 0,reverse=True)[:14]:s.add(Intervention(customer_id=c['id'],action='Review missed refill and offer support',assignee='Unassigned',deadline=date(2026,11,4),status='Pending',notes='Synthetic demonstration record',history='[]'))
   s.add(Campaign(name='Refill reminder demonstration',type='Replenishment reminder',risk='High',simulated=True))
+  install_predictions(s,data)
   s.commit()
  print('Seeded 5,000 synthetic customers and relational histories.')
 if __name__=='__main__':main()
